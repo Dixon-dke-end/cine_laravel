@@ -29,10 +29,9 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->role === 'admin') {
             return redirect()->route('movies.index');
+        }else if ($user->role === 'user'){
+            return redirect()->route('user.index');
         }
-
-        return redirect()->intended('dashboard');
-
     }
 
     /**

@@ -70,6 +70,7 @@
             position: relative;
             z-index: 1;
             animation: slideIn 0.8s ease;
+            margin: 0 auto;
         }
 
         .login-card {
@@ -79,6 +80,96 @@
             padding: 45px;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .login-icon {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            input[type="email"],
+            input[type="password"] {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+
+            .btn-primary {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .login-card {
+                padding: 35px 30px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .login-icon {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .login-container {
+                max-width: 500px;
+            }
+
+            .login-card {
+                padding: 50px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                padding: 10px;
+            }
+
+            .login-card {
+                padding: 30px;
+            }
+
+            .login-icon {
+                font-size: 3rem;
+                margin-bottom: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 5px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .login-header {
+                margin-bottom: 25px;
+            }
         }
 
         .login-header {
@@ -325,22 +416,7 @@
         }
 
         @media (max-width: 768px) {
-            .login-card {
-                padding: 30px 25px;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .login-icon {
-                font-size: 3rem;
-            }
-
-            .actions-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+            /* Ya cubierto por los nuevos media queries más específicos */
         }
     </style>
 </head>
