@@ -60,6 +60,12 @@ return [
             'report' => false,
         ],
 
+        'movies' => [
+            'driver' => 'local',
+            'root' => public_path('storage/movies'),
+            'url' => env('APP_URL').'/storage/movies',
+            'visibility' => 'public'
+        ],
     ],
 
     /*

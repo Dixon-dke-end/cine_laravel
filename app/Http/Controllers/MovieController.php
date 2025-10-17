@@ -36,14 +36,15 @@ class MovieController extends Controller
             'autor'=>'nullable|string|max:255',
             'ruta_imagen'=>'image|mimes:jpg,png,jpeg,gif|max:2048'
         ]);
-        Movie::create($validate);
 
-        if ($request->hasFile('imagen')){
-            $rutaImagen=$imagen->store('public','movies');
-            $movie->ruta_imagen=$rutaImagen;
-            $validate['ruta_imagen']=$rutaImagen;
-        };
-        return redirect()->route('movies.index')->with('success','Pelicula creada correctamente');
+if ($request->hasFile('ruta_imagen')) {
+    $rutaImagen = $request->file('ruta_imagen')->store('movies', 'public');
+    $validate['ruta_imagen'] = $rutaImagen;
+}
+
+Movie::create($validate);
+
+return redirect()->route('movies.index')->with('success', 'Película creada correctamente');
 
     }
 
