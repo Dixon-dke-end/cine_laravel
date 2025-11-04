@@ -35,7 +35,6 @@ class MovieController extends Controller
             'año'=>'nullable|integer',
             'autor'=>'nullable|string|max:255',
             'ruta_imagen'=>'image|mimes:jpg,png,jpeg,gif|max:2048'
-<<<<<<< HEAD
         ]);        
     // 📸 Si hay imagen, la guardamos antes de crear la película
         if ($request->hasFile('ruta_imagen')) {
@@ -47,8 +46,6 @@ class MovieController extends Controller
         Movie::create($validate);
 
         return redirect()->route('movies.index')->with('success', 'Película creada correctamente');
-=======
-        ]);
 
 if ($request->hasFile('ruta_imagen')) {
     $rutaImagen = $request->file('ruta_imagen')->store('movies', 'public');
@@ -59,7 +56,6 @@ Movie::create($validate);
 
 return redirect()->route('movies.index')->with('success', 'Película creada correctamente');
 
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
     }
 
 

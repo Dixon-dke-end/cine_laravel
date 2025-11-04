@@ -5,55 +5,35 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\funcionesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\reservasController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
-<<<<<<< HEAD
-Route::get('/', function () {return redirect()->route('user.index');});
+// 👇 Redirección raíz controlada por middleware 'role'
+Route::get('/', function () {
+    return redirect()->route('user.index');
+})->middleware(['auth', 'role']);
 
-
+// 👇 Dashboard para administradores
 Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware(['auth', 'verified'])->name('dashboard');
-    Route::middleware('auth')->group(function () {
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');});
-    require __DIR__.'/auth.php';
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
+// 👇 Rutas exclusivas para usuarios normales
+Route::get('/user/index', [UserController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('user.index');
 
-
-Route::delete('/movies/{id}',[MovieController::class,'destroy'])->name('movies.destroy');
-=======
-Route::get('/', function () {return view('movies/index');});
-
-Route::get('/dashboard', function () {return view('dashboard');})->middleware(['auth', 'verified'])->name('dashboard');
-
+// 👇 Perfil de usuario autenticado
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+// 👇 Otras rutas del sistema
+require __DIR__.'/auth.php';
 
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');});require __DIR__.'/auth.php';
-
-Route::delete('/movies/{id}',[MovieController::class,'destroy'])->name('movies.destroy');
-
-
-Route::get('/',[MovieController::class,'edit'])->name('movies.edit');
-
-Route::get('/', [MovieController::class,'index']);
-
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
 Route::resource('movies', MovieController::class);
-
-Route::resource('funciones',funcionesController::class);
-
-Route::resource('salas',salasController::class);
-<<<<<<< HEAD
-Route::resource('reservas',reservasController::class);
-Route::get('/user/index', [UserController::class, 'index'])->name('user.index');
-=======
-
-Route::resource('reservas',reservasController::class);
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
+Route::resource('funciones', funcionesController::class);
+Route::resource('salas', salasController::class);
+Route::resource('reservas', reservasController::class);

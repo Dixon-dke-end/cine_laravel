@@ -8,20 +8,28 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleRedirect
 {
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next)
     {
-        // Si el usuario NO está autenticado, lo dejamos pasar (Laravel lo redirige al login)
-        if (!Auth::check()) {
-            return $next($request);
-        }
+        $user = auth()->user();
 
-        // Si ya está autenticado, redirigimos según su rol
-        $user = Auth::user();
-
-        if ($user->role === 'admin') {
-            return redirect()->route('movies.index');
-        } else {
+        if (!$user) {
+            // Si no hay usuario logueado, lo mandas al login
             return redirect()->route('user.index');
         }
+
+        if ($user->role === 'admin') {
+            // Si es admin, va al panel de admin (por ejemplo movies.index)
+            return redirect()->route('movies.index');
+        }
+
+        if ($user->role === 'user') {
+            // Si es usuario normal, va a su vista
+            return redirect()->route('user.index');
+        }
+
+        // Si no cumple ninguna condición, sigue el flujo normal
+        return $next($request);
     }
+
 }
+    
