@@ -7,6 +7,7 @@
     @vite(['resources/css/admin_index.css', 'resources/js/app.js'])
 </head>
 <body>
+<<<<<<< HEAD
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
@@ -58,6 +59,28 @@
     <div class="particles" id="particles"></div>
 
     <div class="content-wrapper">
+=======
+    <h1>Listado de Películas</h1>
+@foreach($movies as $peli)
+<img src="{{ asset('storage/' . $peli->ruta_imagen) }}" alt="Imagen de {{ $peli->titulo }}" width="200">
+
+    <h2>{{ $peli->titulo }}</h2>
+
+    <p>{{ $peli->descripcion }}</p>
+
+    <small>Duración: {{ $peli->duracion }} minutos</small>
+
+    <a href="{{route('movies.edit',$peli->id) }}" class="btn btn-success">editar película</a>
+
+    <form action="{{route('movies.destroy',$peli->id) }}" method="POST" >
+    @csrf
+    @method('DELETE')
+    <button type="submit" onclick="return confirm('estas seguro de eliminar?')">Eliminar</button>
+    </form>
+@endforeach
+<br>
+<a href="{{route('movies.create') }}" class="btn btn-success">Agregar película</a>
+>>>>>>> f690796 (Subida inicial del proyecto Laravel)
 
     <div class="container">
         <div class="header">
