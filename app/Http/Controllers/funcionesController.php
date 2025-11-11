@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Funcion;
+use App\Models\Movie;
+use App\Models\Sala;
 
 class funcionesController extends Controller
 {
@@ -12,7 +14,11 @@ class funcionesController extends Controller
      */
     public function index()
     {
-        //
+        // Obtener todas las películas con sus funciones y salas
+        $peliculas = Movie::with(['funciones.salas'])->get();
+        // También obtener todas las funciones para casos especiales
+        $funciones = Funcion::with(['movies', 'salas'])->orderBy('hora', 'asc')->get();
+        return view('movies.funciones', compact('peliculas', 'funciones'));
     }
 
     /**
@@ -20,7 +26,9 @@ class funcionesController extends Controller
      */
     public function create()
     {
-        //
+        $peliculas = Movie::all();
+        $salas = Sala::all();
+        return view('movies.funciones_create', compact('peliculas', 'salas'));
     }
 
     /**
@@ -28,7 +36,18 @@ class funcionesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validación de los datos
+        $validate = $request->validate([
+            'movie_id' => 'required|exists:movies,id',
+            'sala_id' => 'required|exists:salas,id',
+            'hora' => 'required|date|after:now',
+        ]);
+
+        // Crear la función
+        Funcion::create($validate);
+
+        // Redirigir con mensaje de éxito
+        return redirect()->route('funciones.index')->with('success', 'Función creada correctamente');
     }
 
     /**
@@ -44,7 +63,9 @@ class funcionesController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $peliculas=Funcion::findOrFail($id);
+        return view('movies.funciones_update',compact('peliculas'));
+
     }
 
     /**

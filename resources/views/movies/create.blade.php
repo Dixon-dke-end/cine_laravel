@@ -4,11 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Película</title>
+    <!-- Importación de estilos y scripts de Laravel con Vite -->
     @vite(['resources/css/admin_create.css', 'resources/js/app.js'])
-    <style>
-    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); padding: 15px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 1000;">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <a href="{{ route('movies.index') }}" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
+                🎬 CineVel (Admin)
+            </a>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                @auth
+                    @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('user.index') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;" title="Ver vista de usuario">
+                            👤 Vista Usuario
+                        </a>
+                    @endif
+                    
+                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                        📊 Dashboard
+                    </a>
+                    
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" style="padding: 8px 20px; border-radius: 20px; background: rgba(255, 107, 107, 0.3); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease;">
+                            🚪 Cerrar Sesión
+                        </button>
+                    </form>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
     <!-- Partículas de fondo -->
     <div class="particles" id="particles"></div>
 
@@ -33,6 +62,15 @@
                     <div class="helper-text">El título de la película es obligatorio</div>
                 </div>
 
+                
+                <div class="form-group">
+                    <label for="url_trailer">📄Url del trailer</label>
+                    <textarea id="descripcion" 
+                              name="trailer_url" 
+                              placeholder="Coloca una url valida https://www.youtube.com/embed">{{ old('trailer_url') }}</textarea>
+                    <div class="helper-text">La url para mostrar al usuario</div>
+                </div>
+
                 <div class="form-group">
                     <label for="descripcion">📄 Descripción</label>
                     <textarea id="descripcion" 
@@ -48,6 +86,7 @@
                            name="duracion" 
                            placeholder="Ej: 148" 
                            min="1" 
+                           max="240"
                            value="{{ old('duracion') }}">
                     <div class="helper-text">Duración total en minutos</div>
                 </div>
@@ -74,6 +113,33 @@
                     <div class="helper-text">Nombre del director o autor principal</div>
                 </div>
 
+                <div class="form-group">
+                    <label for="Edad sugerida">Edad Sugerida</label>
+                    <input type="text" 
+                           id="age_suggest" 
+                           name="age_suggest"
+                           value="{{ old('age_suggest') }}">
+                    <div class="helper-text">Coloca la edad a la que va dirigida la pelicula</div>
+
+                </div>
+                           
+                           
+                    <label for="genero">Género</label>
+                    <select id="genero" name="genero" class="form-control">
+                        <option value="">Selecciona un género</option>
+                        <option value="Acción" {{ old('genero') == 'Acción' ? 'selected' : '' }}>Acción</option>
+                        <option value="Aventura" {{ old('genero') == 'Aventura' ? 'selected' : '' }}>Aventura</option>
+                        <option value="Comedia" {{ old('genero') == 'Comedia' ? 'selected' : '' }}>Comedia</option>
+                        <option value="Drama" {{ old('genero') == 'Drama' ? 'selected' : '' }}>Drama</option>
+                        <option value="Terror" {{ old('genero') == 'Terror' ? 'selected' : '' }}>Terror</option>
+                        <option value="Ciencia Ficción" {{ old('genero') == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
+                        <option value="Romance" {{ old('genero') == 'Romance' ? 'selected' : '' }}>Romance</option>
+                        <option value="Animación" {{ old('genero') == 'Animación' ? 'selected' : '' }}>Animación</option>
+                        <option value="Documental" {{ old('genero') == 'Documental' ? 'selected' : '' }}>Documental</option>
+                    </select>
+                    
+                    <div class="helper-text">Coloca el genero de la pelicula</div>
+                
                 <div class="form-group">
                     <label for="ruta_imagen">📷 Imagen de la película</label>
                     <input type="file" 

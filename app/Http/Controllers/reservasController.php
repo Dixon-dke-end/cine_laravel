@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reserva;
+use App\Models\Funcion;
+use App\Models\Movie;      // ← Agregar esto
 
 class reservasController extends Controller
 {
@@ -28,7 +30,36 @@ class reservasController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validación de los datos
+        $validate = $request->validate([
+            'funcion_id' => 'required|exists:funciones,id',
+            'cantidad_asientos' => 'required|integer|min:1|max:10',
+        ]);
+
+        // Obtener la función para verificar disponibilidad
+        $funcion = Funcion::with('salas')->findOrFail($validate['funcion_id']);
+        
+        // Calcular asientos ocupados
+        $asientosOcupados = $funcion->reservas()->sum('cantidad_asientos');
+        $capacidad = $funcion->salas->capacidad ?? 0;
+        $asientosDisponibles = $capacidad - $asientosOcupados;
+
+        // Verificar si hay suficientes asientos disponibles
+        if ($validate['cantidad_asientos'] > $asientosDisponibles) {
+            return back()->withErrors([
+                'cantidad_asientos' => 'No hay suficientes asientos disponibles. Asientos disponibles: ' . $asientosDisponibles
+            ])->withInput();
+        }
+
+        // Agregar el usuario autenticado y el estado
+        $validate['usuario_id'] = auth()->id();
+        $validate['estado'] = 'confirmada';
+
+        // Crear la reserva
+        Reserva::create($validate);
+
+        // Redirigir con mensaje de éxito
+        return redirect()->back()->with('success', 'Reserva realizada exitosamente');
     }
 
     /**
@@ -36,7 +67,13 @@ class reservasController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Obtener la película por ID
+        $movie = Movie::findOrFail($id);
+        
+        $funciones = Funcion::All();
+
+        
+        return view('user.user_func', compact('movie', 'funciones'));
     }
 
     /**
@@ -44,7 +81,7 @@ class reservasController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        
     }
 
     /**

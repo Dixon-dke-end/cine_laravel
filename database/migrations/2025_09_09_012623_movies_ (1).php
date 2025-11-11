@@ -15,10 +15,15 @@ return new class extends Migration
         $table->string('titulo');
         $table->text('descripcion')->nullable();
         $table->integer('duracion')->nullable();
+        $table->string('trailer_url')->nullable(); 
         $table->year('año')->nullable();
         $table->string('autor')->nullable();
         $table->string('ruta_imagen')->nullable();
         $table->timestamps();
+        $table->string('age_suggest');
+        $table->string('genero');
+
+        
     });
 }
     /**

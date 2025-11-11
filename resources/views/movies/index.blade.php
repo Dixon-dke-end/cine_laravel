@@ -7,12 +7,11 @@
     @vite(['resources/css/admin_index.css', 'resources/js/app.js'])
 </head>
 <body>
-<<<<<<< HEAD
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('movies.index') }}" class="navbar-brand">
-                🎬 MoviesCatalog
+                🎬 CineVel (Admin)
             </a>
             
             <div class="navbar-user">
@@ -40,10 +39,18 @@
                 @endguest
                 
                 @auth
+                    @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('user.index') }}" class="btn-dashboard" title="Ver vista de usuario">
+                            👤 Vista Usuario
+                        </a>
+                    @endif
+                    
                     <a href="{{ route('dashboard') }}" class="btn-dashboard">
                         📊 Dashboard
                     </a>
-                    
+                    <a href="{{route('funciones.index')}}" class="btn btn-funciones">
+                                        <span>📅 Funciones</span>
+                                    </a>
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
                         <button type="submit" class="btn-logout">
@@ -59,28 +66,6 @@
     <div class="particles" id="particles"></div>
 
     <div class="content-wrapper">
-=======
-    <h1>Listado de Películas</h1>
-@foreach($movies as $peli)
-<img src="{{ asset('storage/' . $peli->ruta_imagen) }}" alt="Imagen de {{ $peli->titulo }}" width="200">
-
-    <h2>{{ $peli->titulo }}</h2>
-
-    <p>{{ $peli->descripcion }}</p>
-
-    <small>Duración: {{ $peli->duracion }} minutos</small>
-
-    <a href="{{route('movies.edit',$peli->id) }}" class="btn btn-success">editar película</a>
-
-    <form action="{{route('movies.destroy',$peli->id) }}" method="POST" >
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="return confirm('estas seguro de eliminar?')">Eliminar</button>
-    </form>
-@endforeach
-<br>
-<a href="{{route('movies.create') }}" class="btn btn-success">Agregar película</a>
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
 
     <div class="container">
         <div class="header">
@@ -103,7 +88,8 @@
                 
                 <div class="movies-container" id="moviesContainer">
                     @foreach($movies as $peli)
-                        <div class="movie-card" onclick="selectMovie(this)" data-movie-id="{{ $peli->id }}">
+                        <div class="movie-card" style="position: relative;">
+                            <a href="{{ route('movies.show', $peli->id) }}" style="position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 80px); z-index: 1; cursor: pointer;" title="Ver detalles y reservar"></a>
                             <div class="shine"></div>
                             <div class="movie-poster-container">
                                 <img src="{{ asset('storage/'.$peli->ruta_imagen) }}" 
@@ -133,15 +119,18 @@
                                     {{ $peli->descripcion ?? 'Sin descripción disponible' }}
                                 </div>
 
-                                <div class="movie-actions">
-                                    <a href="{{ route('movies.edit', $peli->id) }}" class="btn btn-edit">
+                                <div class="movie-actions" style="position: relative; z-index: 2;">
+                                    <a href="{{ route('movies.show', $peli->id) }}" class="btn btn-edit" onclick="event.stopPropagation();" style="flex: 1;">
+                                        <span>🎫Reservaciones</span>
+                                    </a>
+                                    <a href="{{ route('movies.edit', $peli->id) }}" class="btn btn-edit" onclick="event.stopPropagation();">
                                         <span>✏️ Editar</span>
                                     </a>
-                                    
                                     <form action="{{ route('movies.destroy', $peli->id) }}" 
                                           method="POST" 
                                           style="flex: 1;"
-                                          onsubmit="return confirmDelete(event, '{{ $peli->titulo }}')">
+                                          onsubmit="return confirmDelete(event, '{{ $peli->titulo }}')"
+                                          onclick="event.stopPropagation();">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-delete" style="width: 100%;">

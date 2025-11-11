@@ -5,12 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Película</title>
     @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
-
-    <style>
-        
-    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ route('movies.index') }}" class="navbar-brand">
+                🎬 CineVel (Admin)
+            </a>
+            
+            <div class="navbar-user">
+                @auth
+                    @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('user.index') }}" class="btn-dashboard" title="Ver vista de usuario">
+                            👤 Vista Usuario
+                        </a>
+                    @endif
+                    
+                    <a href="{{ route('dashboard') }}" class="btn-dashboard">
+                        📊 Dashboard
+                    </a>
+                    
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn-logout">
+                            🚪 Cerrar Sesión
+                        </button>
+                    </form>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
     <!-- Partículas de fondo -->
     <div class="particles" id="particles"></div>
 
@@ -39,7 +65,7 @@
                     <label for="duracion">⏱️ Duración (minutos)</label>
                     <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">
                 </div>
-
+                
                 <div class="form-group">
                     <label for="año">📅 Año</label>
                     <input type="number" id="año" name="año" value="{{ $registro->año }}">
@@ -48,6 +74,27 @@
                 <div class="form-group">
                     <label for="autor">🎬 Director / Autor</label>
                     <input type="text" id="autor" name="autor" value="{{ $registro->autor }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="age_suggest">⏱ Edad sugerida</label>
+                    <input type="text" id="age_suggest" name="age_suggest" value="{{ $registro->age_suggest }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="genero">🎬 Género</label>
+                    <select id="genero" name="genero">
+                        <option value="">Selecciona un género</option>
+                        <option value="Acción" {{ $registro->genero == 'Acción' ? 'selected' : '' }}>Acción</option>
+                        <option value="Aventura" {{ $registro->genero == 'Aventura' ? 'selected' : '' }}>Aventura</option>
+                        <option value="Comedia" {{ $registro->genero == 'Comedia' ? 'selected' : '' }}>Comedia</option>
+                        <option value="Drama" {{ $registro->genero == 'Drama' ? 'selected' : '' }}>Drama</option>
+                        <option value="Terror" {{ $registro->genero == 'Terror' ? 'selected' : '' }}>Terror</option>
+                        <option value="Ciencia Ficción" {{ $registro->genero == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
+                        <option value="Romance" {{ $registro->genero == 'Romance' ? 'selected' : '' }}>Romance</option>
+                        <option value="Animación" {{ $registro->genero == 'Animación' ? 'selected' : '' }}>Animación</option>
+                        <option value="Documental" {{ $registro->genero == 'Documental' ? 'selected' : '' }}>Documental</option>
+                    </select>
                 </div>
 
                 @if($registro->ruta_imagen)
@@ -142,7 +189,7 @@
         });
 
         // Validación visual
-        const inputs = document.querySelectorAll('input, textarea');
+        const inputs = document.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             input.addEventListener('blur', function() {
                 if (this.value.trim() !== '') {

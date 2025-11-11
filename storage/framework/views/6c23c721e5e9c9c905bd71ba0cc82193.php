@@ -15,7 +15,7 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="<?php echo e(route('movies.index')); ?>" class="navbar-brand">
+            <a href="<?php echo e(route('user.index')); ?>" class="navbar-brand">
                 CINEVEL
             </a>
             
@@ -30,6 +30,11 @@
                 <?php if(auth()->guard()->guest()): ?>
                     <a href="<?php echo e(route('login')); ?>" class="btn-auth btn-login">INICIAR SESIÓN</a>
                 <?php else: ?>
+                    <?php if(Auth::user()->role === 'admin'): ?>
+                        <a href="<?php echo e(route('movies.index')); ?>" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid rgba(255, 193, 7, 0.5);" title="Ver vista de administrador">
+                            🔧 Vista Admin
+                        </a>
+                    <?php endif; ?>
                     <div class="user-info">
                         <div class="user-avatar">
                             <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
@@ -98,13 +103,15 @@
     <section class="movies-section">
         <div class="movies-grid">
             <?php $__currentLoopData = $movies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $movie): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="movie-card" onclick="showMovieDetails(<?php echo e($movie->id); ?>)">
+                <div class="movie-card" >
                     <div class="movie-badge">ESTRENO</div>
-                    <div class="movie-poster-container">
-                        <img src="<?php echo e(asset('storage/'.$movie->ruta_imagen)); ?>" 
+                    <div class="movie-poster-container" >
+                        <a href="<?php echo e(route('reservas.show', $movie->id)); ?>">
+                        <img  src="<?php echo e(asset('storage/'.$movie->ruta_imagen)); ?>" 
                              alt="<?php echo e($movie->titulo); ?>" 
                              class="movie-poster"
                              onerror="this.src='https://via.placeholder.com/250x350?text=Sin+Imagen'">
+                             </a>
                     </div>
                     
                     <div class="movie-info">
@@ -174,11 +181,7 @@
         // Auto advance
         setInterval(nextSlide, 5000);
 
-        // Movie details
-        function showMovieDetails(movieId) {
-            console.log('Ver detalles de película:', movieId);
-            // Aquí puedes agregar lógica para modal o redirección
-        }
+        
     </script>
 </body>
 </html><?php /**PATH C:\backup\cine_laravel\resources\views/user/index.blade.php ENDPATH**/ ?>

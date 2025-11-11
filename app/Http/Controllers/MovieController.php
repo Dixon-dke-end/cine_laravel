@@ -1,122 +1,154 @@
 <?php
 
+// Definimos el espacio de nombres del controlador.
+// Esto permite a Laravel ubicarlo correctamente dentro de la estructura del proyecto.
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
-use App\Models\Movie;
-use Illuminate\Support\Facades\Storage;
+
+use Illuminate\Http\Request;             // Permite manejar las peticiones HTTP (formularios, archivos, etc.)
+use App\Models\Movie;                    // Importa el modelo Movie, que interactúa con la base de datos.
+use Illuminate\Support\Facades\Storage;  // Permite manipular archivos (guardar, eliminar, etc.) en el almacenamiento.
+
 class MovieController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra un listado de todas las películas almacenadas.
      */
     public function index()
     {
-        $var_movies=Movie::all();
-        return view('movies.index',['movies'=>$var_movies]);            
+        // Obtiene todos los registros de la tabla 'movies' usando Eloquent.
+        $var_movies = Movie::all();
+
+        // Envía los datos obtenidos a la vista 'movies.index'.
+        // 'movies' es la variable que la vista usará para mostrar las películas.
+        return view('movies.index', ['movies' => $var_movies]);            
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear una nueva película.
      */
     public function create()
     {
-         return view('movies.create');
+        // Simplemente carga la vista 'movies.create', donde estará el formulario de creación.
+        return view('movies.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guarda una nueva película en la base de datos.
      */
     public function store(Request $request)
     {
-        $validate=$request->validate([
+        // ✅ Validación de los datos que vienen del formulario.
+        // Se asegura de que los campos tengan el tipo correcto y que la imagen cumpla los requisitos.
+        $validate = $request->validate([
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'duracion'=>'nullable|integer',
-            'año'=>'nullable|integer',
-            'autor'=>'nullable|string|max:255',
-            'ruta_imagen'=>'image|mimes:jpg,png,jpeg,gif|max:2048'
-<<<<<<< HEAD
+            'duracion' => 'nullable|integer',
+            'año' => 'nullable|integer',
+            'autor' => 'nullable|string|max:255',
+            'ruta_imagen' => 'image|mimes:jpg,png,jpeg,gif|max:2048',
+            'trailer_url'=>'nullable|string',
+            'age_suggest'=>'nullable|string',
+            'genero'=>'nullable|string',
         ]);        
-    // 📸 Si hay imagen, la guardamos antes de crear la película
+
+        // 📸 Si se envía una imagen, se guarda en la carpeta 'movies' dentro del disco 'public'.
+        // Luego se agrega la ruta del archivo al arreglo validado.
         if ($request->hasFile('ruta_imagen')) {
             $rutaImagen = $request->file('ruta_imagen')->store('movies', 'public');
             $validate['ruta_imagen'] = $rutaImagen;
         }
 
-        // 🧱 Ahora sí creamos el registro con la imagen incluida
+        // 🧱 Crea el registro en la base de datos con los datos validados (incluyendo la imagen si existe).
         Movie::create($validate);
 
+        // 🔁 Redirige de nuevo al listado de películas con un mensaje de éxito.
         return redirect()->route('movies.index')->with('success', 'Película creada correctamente');
-=======
-        ]);
-
-if ($request->hasFile('ruta_imagen')) {
-    $rutaImagen = $request->file('ruta_imagen')->store('movies', 'public');
-    $validate['ruta_imagen'] = $rutaImagen;
-}
-
-Movie::create($validate);
-
-return redirect()->route('movies.index')->with('success', 'Película creada correctamente');
-
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
     }
 
-
     /**
-     * Display the specified resource.
+     * Muestra los detalles de una película específica con sus funciones disponibles.
      */
     public function show(string $id)
     {
-        //
+        // Busca la película con sus funciones y salas relacionadas
+        // findOrFail lanza un error 404 si no encuentra la película
+        $pelicula = Movie::with(['funciones.salas', 'funciones.reservas'])->findOrFail($id);
+        
+        // Obtiene solo las funciones futuras, ordenadas por hora
+        $funciones = $pelicula->funciones()
+            ->where('hora', '>', now())
+            ->with(['salas', 'reservas'])
+            ->orderBy('hora', 'asc')
+            ->get();
+        
+        // Retorna la vista con los datos
+        return view('movies.show', compact('pelicula', 'funciones'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar una película existente.
      */
     public function edit($id)
     {
-        $registro=Movie::findOrFail($id);
-        return view('movies.edit',compact('registro'));
+        // Busca la película según el ID o lanza un error 404 si no existe.
+        $registro = Movie::findOrFail($id);
+
+        // Envía el registro a la vista 'movies.edit' para mostrar el formulario con los datos cargados.
+        return view('movies.edit', compact('registro'));
     }
 
     /**
-     * Update the specified resource  in storage.
+     * Actualiza los datos de una película existente.
      */
     public function update(Request $request, string $id)
     {
-        $registro=Movie::findOrFail($id);
+        // Busca el registro que se va a actualizar.
+        $registro = Movie::findOrFail($id);
+
+        // Actualiza los datos directamente (aunque se revalida más abajo).
         $registro->update($request->all());
 
-            $validate=$request->validate([
+        // ✅ Valida nuevamente los campos (esto debería hacerse antes del update real).
+        $validate = $request->validate([
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
-            'duracion'=>'nullable|integer',
-            'año'=>'nullable|integer',
-            'autor'=>'nullable|string|max:255',
-            'ruta_imagen'=>'image|mimes:jpg,png,jpeg,gif|max:2048'
+            'duracion' => 'nullable|integer',
+            'año' => 'nullable|integer',
+            'autor' => 'nullable|string|max:255',
+            'ruta_imagen' => 'image|mimes:jpg,png,jpeg,gif|max:2048'
         ]);
-            if ($request->hasFile('imagen')) {
-        // Borrar la imagen vieja si existe
-        if ($registro->ruta_imagen) {
-            Storage::disk('public')->delete($registro->ruta_imagen);
-        }
-              // Guardar la nueva
-        $rutaImagen = $request->file('imagen')->store('movies', 'public');
-        $validate['ruta_imagen'] = $rutaImagen;
-    }
-           $registro->update($validate);
-        return redirect()->route('movies.index')->with('success','pelicula actualizada');
 
+        // 📸 Si se sube una nueva imagen:
+        if ($request->hasFile('imagen')) {
+            // Si la película ya tenía una imagen anterior, se elimina del almacenamiento.
+            if ($registro->ruta_imagen) {
+                Storage::disk('public')->delete($registro->ruta_imagen);
+            }
+
+            // Se guarda la nueva imagen en la carpeta 'movies' y se actualiza la ruta.
+            $rutaImagen = $request->file('imagen')->store('movies', 'public');
+            $validate['ruta_imagen'] = $rutaImagen;
+        }
+
+        // 🧱 Se aplican los nuevos valores (incluyendo la posible nueva imagen).
+        $registro->update($validate);
+
+        // 🔁 Redirige a la lista con un mensaje confirmando la actualización.
+        return redirect()->route('movies.index')->with('success', 'película actualizada');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una película de la base de datos.
      */
     public function destroy(string $id)
     {
-        $registro=Movie::findOrFail($id);
+        // Busca el registro que se desea eliminar.
+        $registro = Movie::findOrFail($id);
+
+        // Elimina el registro de la base de datos.
         $registro->delete();
-         return redirect()->route('movies.index')->with('success', 'Película eliminada');
+
+        // Redirige con un mensaje de confirmación.
+        return redirect()->route('movies.index')->with('success', 'Película eliminada');
     }
 }

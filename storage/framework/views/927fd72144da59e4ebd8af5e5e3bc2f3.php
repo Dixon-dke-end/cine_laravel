@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pelicula->titulo }} - CineVel</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title><?php echo e($pelicula->titulo); ?> - CineVel</title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <style>
         body {
             background: #0a0e27;
@@ -195,96 +195,99 @@
     <!-- Navbar (mismo que user/index) -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('user.index') }}" class="navbar-brand">
+            <a href="<?php echo e(route('user.index')); ?>" class="navbar-brand">
                 CINEVEL
             </a>
             
             <ul class="navbar-menu">
-                <li><a href="{{ route('user.index') }}" class="active">CARTELERA</a></li>
+                <li><a href="<?php echo e(route('user.index')); ?>" class="active">CARTELERA</a></li>
                 <li><a href="#promociones">PROMOCIONES</a></li>
                 <li><a href="#proximamente">PRÓXIMAMENTE</a></li>
                 <li><a href="#confiteria">CONFITERÍA</a></li>
             </ul>
 
             <div class="navbar-user">
-                @guest
-                    <a href="{{ route('login') }}" class="btn-auth btn-login">INICIAR SESIÓN</a>
-                @else
-                    @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('movies.index') }}" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid rgba(255, 193, 7, 0.5);" title="Ver vista de administrador">
+                <?php if(auth()->guard()->guest()): ?>
+                    <a href="<?php echo e(route('login')); ?>" class="btn-auth btn-login">INICIAR SESIÓN</a>
+                <?php else: ?>
+                    <?php if(Auth::user()->role === 'admin'): ?>
+                        <a href="<?php echo e(route('movies.index')); ?>" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid rgba(255, 193, 7, 0.5);" title="Ver vista de administrador">
                             🔧 Vista Admin
                         </a>
-                    @endif
+                    <?php endif; ?>
                     <div class="user-info">
                         <div class="user-avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
                         </div>
-                        <span class="user-name">{{ Auth::user()->name }}</span>
+                        <span class="user-name"><?php echo e(Auth::user()->name); ?></span>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-auth btn-logout">
                             CERRAR SESIÓN
                         </button>
                     </form>
-                @endguest
+                <?php endif; ?>
             </div>
         </div>
     </nav>
 
     <div class="movie-detail-container">
         <!-- Botón volver -->
-        <a href="{{ route('user.index') }}" class="btn-volver">← Volver al Catálogo</a>
+        <a href="<?php echo e(route('user.index')); ?>" class="btn-volver">← Volver al Catálogo</a>
 
         <!-- Mensajes de éxito/error -->
-        @if(session('success'))
+        <?php if(session('success')): ?>
             <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+                <?php echo e(session('success')); ?>
 
-        @if($errors->any())
+            </div>
+        <?php endif; ?>
+
+        <?php if($errors->any()): ?>
             <div class="alert alert-error">
                 <ul style="margin: 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Información de la película -->
         <div class="movie-header">
             <div class="movie-poster">
-                @if($pelicula->ruta_imagen)
-                    <img src="{{ asset('storage/'.$pelicula->ruta_imagen) }}" 
-                         alt="{{ $pelicula->titulo }}" 
+                <?php if($pelicula->ruta_imagen): ?>
+                    <img src="<?php echo e(asset('storage/'.$pelicula->ruta_imagen)); ?>" 
+                         alt="<?php echo e($pelicula->titulo); ?>" 
                          class="movie-poster-large"
                          onerror="this.src='https://via.placeholder.com/300x450?text=Sin+Imagen'">
-                @else
+                <?php else: ?>
                     <img src="https://via.placeholder.com/300x450?text=Sin+Imagen" 
                          alt="Sin imagen" 
                          class="movie-poster-large">
-                @endif
+                <?php endif; ?>
             </div>
             
             <div class="movie-info-large">
-                <h1 class="movie-title-large">{{ $pelicula->titulo }}</h1>
+                <h1 class="movie-title-large"><?php echo e($pelicula->titulo); ?></h1>
                 
                 <div class="movie-meta-large">
-                    @if($pelicula->año)
-                        <span class="meta-item">📅 {{ $pelicula->año }}</span>
-                    @endif
-                    @if($pelicula->duracion)
-                        <span class="meta-item">⏱️ {{ $pelicula->duracion }} min</span>
-                    @endif
-                    @if($pelicula->autor)
-                        <span class="meta-item">🎬 {{ $pelicula->autor }}</span>
-                    @endif
+                    <?php if($pelicula->año): ?>
+                        <span class="meta-item">📅 <?php echo e($pelicula->año); ?></span>
+                    <?php endif; ?>
+                    <?php if($pelicula->duracion): ?>
+                        <span class="meta-item">⏱️ <?php echo e($pelicula->duracion); ?> min</span>
+                    <?php endif; ?>
+                    <?php if($pelicula->autor): ?>
+                        <span class="meta-item">🎬 <?php echo e($pelicula->autor); ?></span>
+                    <?php endif; ?>
                 </div>
 
                 <div class="movie-description-large">
-                    {{ $pelicula->descripcion ?? 'Sin descripción disponible' }}
+                    <?php echo e($pelicula->descripcion ?? 'Sin descripción disponible'); ?>
+
                 </div>
             </div>
         </div>
@@ -293,74 +296,84 @@
         <div class="funciones-section">
             <h2 class="section-title">🎫 Funciones Disponibles</h2>
             
-            @if($funciones->isEmpty())
+            <?php if($funciones->isEmpty()): ?>
                 <div class="no-funciones">
                     <p>No hay funciones disponibles para esta película en este momento.</p>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="funciones-grid">
-                    @foreach($funciones as $funcion)
-                        @php
+                    <?php $__currentLoopData = $funciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $funcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             // Calcular asientos disponibles
                             $asientosOcupados = $funcion->reservas()->sum('cantidad_asientos');
                             $capacidad = $funcion->salas->capacidad ?? 0;
                             $asientosDisponibles = max(0, $capacidad - $asientosOcupados);
-                        @endphp
+                        ?>
 
                         <div class="funcion-card">
                             <div class="funcion-time">
-                                🕐 {{ \Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i') }}
+                                🕐 <?php echo e(\Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i')); ?>
+
                             </div>
                             
                             <div class="funcion-sala-info">
-                                🎭 Sala: {{ $funcion->salas->nombre_sala ?? 'No disponible' }}
+                                🎭 Sala: <?php echo e($funcion->salas->nombre_sala ?? 'No disponible'); ?>
+
                             </div>
                             
                             <div class="funcion-capacidad-info">
-                                💺 {{ $asientosDisponibles }} asientos disponibles
+                                💺 <?php echo e($asientosDisponibles); ?> asientos disponibles
                             </div>
 
-                            @auth
-                                @if($asientosDisponibles > 0)
-                                    <form action="{{ route('reservas.store') }}" method="POST" class="reserva-form">
-                                        @csrf
-                                        <input type="hidden" name="funcion_id" value="{{ $funcion->id }}">
+                            <?php if(auth()->guard()->check()): ?>
+                                <?php if($asientosDisponibles > 0): ?>
+                                    <form action="<?php echo e(route('reservas.store')); ?>" method="POST" class="reserva-form">
+                                        <?php echo csrf_field(); ?>
+                                        <input type="hidden" name="funcion_id" value="<?php echo e($funcion->id); ?>">
                                         
                                         <div class="form-group-reserva">
-                                            <label for="cantidad_asientos_{{ $funcion->id }}">Cantidad de asientos:</label>
+                                            <label for="cantidad_asientos_<?php echo e($funcion->id); ?>">Cantidad de asientos:</label>
                                             <input type="number" 
-                                                   id="cantidad_asientos_{{ $funcion->id }}" 
+                                                   id="cantidad_asientos_<?php echo e($funcion->id); ?>" 
                                                    name="cantidad_asientos" 
                                                    min="1" 
-                                                   max="{{ min($asientosDisponibles, 10) }}"
-                                                   value="{{ old('cantidad_asientos', 1) }}"
+                                                   max="<?php echo e(min($asientosDisponibles, 10)); ?>"
+                                                   value="<?php echo e(old('cantidad_asientos', 1)); ?>"
                                                    required>
-                                            @error('cantidad_asientos')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
+                                            <?php $__errorArgs = ['cantidad_asientos'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <div class="error-message"><?php echo e($message); ?></div>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                         </div>
                                         
                                         <button type="submit" class="btn-reservar">
                                             🎫 Reservar
                                         </button>
                                     </form>
-                                @else
+                                <?php else: ?>
                                     <button class="btn-reservar" disabled>
                                         ❌ Agotado
                                     </button>
-                                @endif
-                            @else
-                                <a href="{{ route('login') }}" class="btn-reservar" style="text-decoration: none; display: block; text-align: center;">
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <a href="<?php echo e(route('login')); ?>" class="btn-reservar" style="text-decoration: none; display: block; text-align: center;">
                                     🔐 Inicia sesión para reservar
                                 </a>
-                            @endauth
+                            <?php endif; ?>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </body>
 </html>
 
 
+<?php /**PATH C:\backup\cine_laravel\resources\views/movies/show.blade.php ENDPATH**/ ?>

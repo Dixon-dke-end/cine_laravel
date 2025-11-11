@@ -1,59 +1,62 @@
 <?php
 
+// Importa los controladores necesarios para manejar las diferentes rutas
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\funcionesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\reservasController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
-<<<<<<< HEAD
-Route::get('/', function () {return redirect()->route('user.index');});
+// 👇 Ruta principal del sitio ("/")
+// Cuando un usuario entra a la raíz, es redirigido automáticamente
+// a la ruta llamada 'user.index', que probablemente muestra el panel del usuario.
+// Esta ruta está protegida por dos middlewares:
+//  - 'auth': exige que el usuario esté autenticado.
+//  - 'role': verifica el rol (por ejemplo, si es admin o usuario normal).
+Route::get('/', function () {
+    // no necesita devolver vista
+})->middleware('role');
 
 
+// 👇 Ruta para el panel de administración (dashboard)
+// Solo accesible para usuarios autenticados y verificados.
+// 'verified' se usa normalmente cuando el sistema exige verificación de correo.
 Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware(['auth', 'verified'])->name('dashboard');
-    Route::middleware('auth')->group(function () {
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');});
-    require __DIR__.'/auth.php';
+    return view('dashboard');
+})->middleware([ 'verified'])->name('dashboard');
 
+// 👇 Ruta para el panel principal de los usuarios normales.
+// Llama al método 'index' del UserController.
+// Está protegida por el middleware 'auth' (debe estar logueado).
+Route::get('/user/index', [UserController::class, 'index'])
+    ->name('user.index');
 
-
-Route::delete('/movies/{id}',[MovieController::class,'destroy'])->name('movies.destroy');
-=======
-Route::get('/', function () {return view('movies/index');});
-
-Route::get('/dashboard', function () {return view('dashboard');})->middleware(['auth', 'verified'])->name('dashboard');
-
+// 👇 Grupo de rutas relacionadas con el perfil del usuario autenticado.
+// Este grupo aplica el middleware 'auth' a todas sus rutas internas.
 Route::middleware('auth')->group(function () {
 
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Muestra la vista para editar el perfil del usuario actual.
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Procesa los cambios del perfil enviados por el formulario (método PATCH).
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');});require __DIR__.'/auth.php';
+    // Elimina el perfil (usuario) autenticado.
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-Route::delete('/movies/{id}',[MovieController::class,'destroy'])->name('movies.destroy');
+// 👇 Carga las rutas de autenticación generadas por Laravel Breeze o Jetstream
+// (login, registro, recuperación de contraseña, etc.)
+require __DIR__.'/auth.php';
 
+// 👇 Define rutas RESTful automáticas para los recursos principales del sistema.
+// Laravel genera automáticamente todas las rutas CRUD (index, create, store, show, edit, update, destroy)
+// para cada uno de los siguientes controladores:
 
-Route::get('/',[MovieController::class,'edit'])->name('movies.edit');
-
-Route::get('/', [MovieController::class,'index']);
-
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
-Route::resource('movies', MovieController::class);
-
-Route::resource('funciones',funcionesController::class);
-
-Route::resource('salas',salasController::class);
-<<<<<<< HEAD
-Route::resource('reservas',reservasController::class);
-Route::get('/user/index', [UserController::class, 'index'])->name('user.index');
-=======
-
-Route::resource('reservas',reservasController::class);
->>>>>>> f690796 (Subida inicial del proyecto Laravel)
+Route::resource('movies', MovieController::class);        // CRUD de películas
+Route::resource('funciones', funcionesController::class); // CRUD de funciones (horarios o sesiones)
+Route::resource('salas', salasController::class);         // CRUD de salas (espacios físicos)
+Route::resource('reservas', reservasController::class);   // CRUD de reservas (boletos o entradas)
+Route::get('/reservas/{id}', [ReservasController::class, 'show'])->name('reservas.show');
