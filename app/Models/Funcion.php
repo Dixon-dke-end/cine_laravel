@@ -35,7 +35,7 @@ use App\Models\Reserva;
      * belongsTo → cada función ocurre en una sala específica.
      * El segundo parámetro ('sala_id') es la clave foránea que relaciona con la tabla 'salas'.
      */
-    public function salas()
+    public function Sala()
     {
         return $this->belongsTo(Sala::class, 'sala_id');
     }

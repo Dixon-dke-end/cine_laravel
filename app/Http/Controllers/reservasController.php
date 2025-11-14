@@ -67,13 +67,8 @@ class reservasController extends Controller
      */
     public function show(string $id)
     {
-        // Obtener la película por ID
-        $movie = Movie::findOrFail($id);
+        return view('user.reserva');
         
-        $funciones = Funcion::All();
-
-        
-        return view('user.user_func', compact('movie', 'funciones'));
     }
 
     /**

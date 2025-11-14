@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineVel - Catálogo de Películas</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 </head>
 <body>
     <!-- Top Bar -->
@@ -15,7 +15,7 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('user.index') }}" class="navbar-brand">
+            <a href="<?php echo e(route('user.index')); ?>" class="navbar-brand">
                 CINEVEL
             </a>
             
@@ -27,27 +27,28 @@
             </ul>
 
             <div class="navbar-user">
-                @guest
-                    <a href="{{ route('login') }}" class="btn-auth btn-login">INICIAR SESIÓN</a>
-                @else
-                    @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('movies.index') }}" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid rgba(255, 193, 7, 0.5);" title="Ver vista de administrador">
+                <?php if(auth()->guard()->guest()): ?>
+                    <a href="<?php echo e(route('login')); ?>" class="btn-auth btn-login">INICIAR SESIÓN</a>
+                <?php else: ?>
+                    <?php if(Auth::user()->role === 'admin'): ?>
+                        <a href="<?php echo e(route('movies.index')); ?>" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid rgba(255, 193, 7, 0.5);" title="Ver vista de administrador">
                             🔧 Vista Admin
                         </a>
-                    @endif
+                    <?php endif; ?>
                     <div class="user-info">
                         <div class="user-avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
                         </div>
-                        <span class="user-name">{{ Auth::user()->name }}</span>
+                        <span class="user-name"><?php echo e(Auth::user()->name); ?></span>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-auth btn-logout">
                             CERRAR SESIÓN
                         </button>
                     </form>
-                @endguest
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -101,36 +102,37 @@
     <!-- Movies Grid -->
     <section class="movies-section">
         <div class="movies-grid">
-            @foreach($movies as $movie)
+            <?php $__currentLoopData = $movies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $movie): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="movie-card" >
                     <div class="movie-badge">ESTRENO</div>
                     <div class="movie-poster-container" >
-                        <a href="{{ route('funciones.show', $movie->id) }}">
-                        <img  src="{{ asset('storage/'.$movie->ruta_imagen) }}" 
-                             alt="{{ $movie->titulo }}" 
+                        <a href="<?php echo e(route('funciones.show', $movie->id)); ?>">
+                        <img  src="<?php echo e(asset('storage/'.$movie->ruta_imagen)); ?>" 
+                             alt="<?php echo e($movie->titulo); ?>" 
                              class="movie-poster"
                              onerror="this.src='https://via.placeholder.com/250x350?text=Sin+Imagen'">
                              </a>
                     </div>
                     
                     <div class="movie-info">
-                        <div class="movie-title">{{ $movie->titulo }}</div>
+                        <div class="movie-title"><?php echo e($movie->titulo); ?></div>
                         
                         <div class="movie-meta">
-                            @if($movie->año)
-                                <span class="badge badge-year">{{ $movie->año }}</span>
-                            @endif
-                            @if($movie->duracion)
-                                <span class="badge badge-duration">{{ $movie->duracion }} min</span>
-                            @endif
+                            <?php if($movie->año): ?>
+                                <span class="badge badge-year"><?php echo e($movie->año); ?></span>
+                            <?php endif; ?>
+                            <?php if($movie->duracion): ?>
+                                <span class="badge badge-duration"><?php echo e($movie->duracion); ?> min</span>
+                            <?php endif; ?>
                         </div>
 
                         <div class="movie-description">
-                            {{ $movie->descripcion ?? 'Sin descripción disponible' }}
+                            <?php echo e($movie->descripcion ?? 'Sin descripción disponible'); ?>
+
                         </div>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
     </section>
 
@@ -182,4 +184,4 @@
         
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/user/index.blade.php ENDPATH**/ ?>

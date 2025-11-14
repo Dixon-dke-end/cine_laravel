@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $movie->titulo }} - Funciones Disponibles</title>
+    <title><?php echo e($movie->titulo); ?> - Funciones Disponibles</title>
     <style>
         * {
             margin: 0;
@@ -490,10 +490,10 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('user.index') }}" class="navbar-brand">
+            <a href="<?php echo e(route('user.index')); ?>" class="navbar-brand">
                 CINEVEL
             </a>
-            <a href="{{ route('user.index') }}" class="btn-back">
+            <a href="<?php echo e(route('user.index')); ?>" class="btn-back">
                 ← Volver al Catálogo
             </a>
         </div>
@@ -503,69 +503,69 @@
     <div class="movie-header">
         <!-- Left Column: Poster + Details -->
         <div class="left-column">
-            <img src="{{ asset('storage/' . $movie->ruta_imagen) }}" 
-                 alt="{{ $movie->titulo }}" 
+            <img src="<?php echo e(asset('storage/' . $movie->ruta_imagen)); ?>" 
+                 alt="<?php echo e($movie->titulo); ?>" 
                  class="movie-poster-large"
-                 onerror="this.src='https://via.placeholder.com/400x600?text={{ $movie->titulo }}'">
+                 onerror="this.src='https://via.placeholder.com/400x600?text=<?php echo e($movie->titulo); ?>'">
             
             <div class="movie-details">
-                <h1 class="movie-title">{{ $movie->titulo }}</h1>
+                <h1 class="movie-title"><?php echo e($movie->titulo); ?></h1>
                 
                 <div class="movie-badges">
-                    <span class="badge badge-age">{{ $movie->age_suggest }}</span>
-                    <span class="badge badge-genre">{{ $movie->genero }}</span>
+                    <span class="badge badge-age"><?php echo e($movie->age_suggest); ?></span>
+                    <span class="badge badge-genre"><?php echo e($movie->genero); ?></span>
                 </div>
 
                 <div class="movie-info-item">
                     <span class="movie-info-label">📝 TÍTULO ORIGINAL</span>
-                    <span>{{ $movie->titulo }}</span>
+                    <span><?php echo e($movie->titulo); ?></span>
                 </div>
 
-                @if($movie->autor)
+                <?php if($movie->autor): ?>
                 <div class="movie-info-item">
                     <span class="movie-info-label">🎬 DIRECTOR</span>
-                    <span>{{ $movie->autor }}</span>
+                    <span><?php echo e($movie->autor); ?></span>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                @if($movie->duracion)
+                <?php if($movie->duracion): ?>
                 <div class="movie-info-item">
                     <span class="movie-info-label">⏱️ DURACIÓN</span>
-                    <span>{{ $movie->duracion }} minutos</span>
+                    <span><?php echo e($movie->duracion); ?> minutos</span>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                @if($movie->año)
+                <?php if($movie->año): ?>
                 <div class="movie-info-item">
                     <span class="movie-info-label">📅 AÑO</span>
-                    <span>{{ $movie->año }}</span>
+                    <span><?php echo e($movie->año); ?></span>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                @if($movie->descripcion)
+                <?php if($movie->descripcion): ?>
                 <div class="movie-synopsis">
                     <span class="movie-info-label">📄 SINOPSIS</span>
-                    <p>{{ $movie->descripcion }}</p>
+                    <p><?php echo e($movie->descripcion); ?></p>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- Right Column: Trailer + Schedule -->
         <div class="right-column">
             <!-- Trailer Section -->
-            @if($movie->trailer_url)
+            <?php if($movie->trailer_url): ?>
             <div class="trailer-section">
                 <h2 class="trailer-title">🎥 Trailer Oficial</h2>
                 <div class="trailer-container">
                     <iframe 
-                        src="{{ $movie->trailer_url }}" 
+                        src="<?php echo e($movie->trailer_url); ?>" 
                         allowfullscreen
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                     </iframe>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Schedule Section con Calendario -->
             <div class="schedule-section">
@@ -573,7 +573,7 @@
                     📅 Selecciona un día para ver las funciones
                 </h2>
 
-                @php
+                <?php
                     // Obtener todas las fechas únicas con funciones
                     $todasLasFechas = $funciones->pluck('hora')
                         ->map(function($hora) {
@@ -588,7 +588,7 @@
                     for ($i = -1; $i < 14; $i++) {
                         $fechasCalendario->push(\Carbon\Carbon::now()->addDays($i)->format('Y-m-d'));
                     }
-                @endphp
+                ?>
 
                 <!-- Calendario de Días con Carrusel -->
                 <div class="calendar-container">
@@ -599,21 +599,21 @@
                         
                         <div class="calendar-days-container">
                             <div class="calendar-days" id="calendarDays">
-                                @foreach($fechasCalendario as $index => $fecha)
-                                    @php
+                                <?php $__currentLoopData = $fechasCalendario; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $fecha): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $carbon = \Carbon\Carbon::parse($fecha);
                                         $tieneFunciones = $todasLasFechas->contains($fecha);
-                                    @endphp
+                                    ?>
                                     
-                                    <div class="day-card {{ $index === 0 && $tieneFunciones ? 'active' : '' }}" 
-                                         data-fecha="{{ $fecha }}"
-                                         data-tiene-funciones="{{ $tieneFunciones ? 'true' : 'false' }}"
+                                    <div class="day-card <?php echo e($index === 0 && $tieneFunciones ? 'active' : ''); ?>" 
+                                         data-fecha="<?php echo e($fecha); ?>"
+                                         data-tiene-funciones="<?php echo e($tieneFunciones ? 'true' : 'false'); ?>"
                                          onclick="selectDay(this)">
-                                        <div class="day-name">{{ $carbon->locale('es')->isoFormat('ddd') }}</div>
-                                        <div class="day-number">{{ $carbon->format('d') }}</div>
-                                        <div class="day-month">{{ $carbon->locale('es')->isoFormat('MMM') }}</div>
+                                        <div class="day-name"><?php echo e($carbon->locale('es')->isoFormat('ddd')); ?></div>
+                                        <div class="day-number"><?php echo e($carbon->format('d')); ?></div>
+                                        <div class="day-month"><?php echo e($carbon->locale('es')->isoFormat('MMM')); ?></div>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
 
@@ -625,43 +625,44 @@
 
                 <!-- Lista de Cines y Funciones -->
                 <div class="cinema-list" id="cinemaList">
-                    @php
+                    <?php
                         // Mostrar funciones del primer día por defecto
                         $primeraFecha = $todasLasFechas->first();
                         $funcionesPrimerDia = $funciones->filter(function($funcion) use ($primeraFecha) {
                             return \Carbon\Carbon::parse($funcion->hora)->format('Y-m-d') === $primeraFecha;
                         })->groupBy('sala.nombre_sala');
-                    @endphp
+                    ?>
 
-                    @if($funcionesPrimerDia->count() > 0)
-                        @foreach($funcionesPrimerDia as $salaNombre => $funcionesSala)
+                    <?php if($funcionesPrimerDia->count() > 0): ?>
+                        <?php $__currentLoopData = $funcionesPrimerDia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $salaNombre => $funcionesSala): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="cinema-card">
                                 <div class="cinema-info">
-                                    <div class="cinema-name">🎭 {{ $salaNombre }}</div>
+                                    <div class="cinema-name">🎭 <?php echo e($salaNombre); ?></div>
                                     <div class="cinema-address">📍 Sala Principal</div>
                                 </div>
 
                                 <div class="showtimes-grid">
-                                    @foreach($funcionesSala as $funcion)
+                                    <?php $__currentLoopData = $funcionesSala; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $funcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <button class="showtime-btn" 
-                                            href="{{route('reservas.show', $funcion->id )}}"
-                                            {{ ($funcion->disponible ?? true) ? '' : 'disabled' }}>
+                                            href="<?php echo e(route('reservas.show', $funcion->id )); ?>"
+                                            <?php echo e(($funcion->disponible ?? true) ? '' : 'disabled'); ?>>
                                         <span class="showtime-time">
-                                            {{ \Carbon\Carbon::parse($funcion->hora)->format('H:i') }}
+                                            <?php echo e(\Carbon\Carbon::parse($funcion->hora)->format('H:i')); ?>
+
                                         </span>
-                                        <span class="showtime-room">Sala {{ $funcion->sala_id }}</span>
+                                        <span class="showtime-room">Sala <?php echo e($funcion->sala_id); ?></span>
                                     </button>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @endforeach
-                    @else
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php else: ?>
                         <div class="empty-state">
                             <div class="empty-state-icon">🎬</div>
                             <h3>No hay funciones disponibles</h3>
                             <p>Selecciona otro día para ver las funciones disponibles</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -797,4 +798,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/user/user_func.blade.php ENDPATH**/ ?>

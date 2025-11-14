@@ -15,9 +15,9 @@ class funcionesController extends Controller
     public function index()
     {
         // Obtener todas las películas con sus funciones y salas
-        $peliculas = Movie::with(['funciones.salas'])->get();
+        $peliculas = Movie::with(['funciones.sala'])->get();
         // También obtener todas las funciones para casos especiales
-        $funciones = Funcion::with(['movies', 'salas'])->orderBy('hora', 'asc')->get();
+        $funciones = Funcion::with(['movies', 'sala'])->orderBy('hora', 'asc')->get();
         return view('movies.funciones', compact('peliculas', 'funciones'));
     }
 
@@ -55,7 +55,13 @@ class funcionesController extends Controller
      */
     public function show(string $id)
     {
-        //
+                // Obtener la película por ID
+        $movie = Movie::findOrFail($id);
+        
+        $funciones = Funcion::All();
+
+        
+        return view('user.user_func', compact('movie', 'funciones'));
     }
 
     /**

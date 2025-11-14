@@ -1,5 +1,4 @@
 <?php
-
 // Importa los controladores necesarios para manejar las diferentes rutas
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MovieController;
@@ -56,7 +55,15 @@ require __DIR__.'/auth.php';
 // para cada uno de los siguientes controladores:
 
 Route::resource('movies', MovieController::class);        // CRUD de películas
+
 Route::resource('funciones', funcionesController::class); // CRUD de funciones (horarios o sesiones)
+
 Route::resource('salas', salasController::class);         // CRUD de salas (espacios físicos)
+
 Route::resource('reservas', reservasController::class);   // CRUD de reservas (boletos o entradas)
+
 Route::get('/reservas/{id}', [ReservasController::class, 'show'])->name('reservas.show');
+// Ruta para obtener funciones por fecha
+
+Route::get('/movies/{movie}/funciones-por-fecha', [MovieController::class, 'getFuncionesPorFecha'])
+    ->name('movies.funciones-por-fecha');

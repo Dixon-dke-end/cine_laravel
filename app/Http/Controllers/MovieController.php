@@ -151,4 +151,74 @@ class MovieController extends Controller
         // Redirige con un mensaje de confirmación.
         return redirect()->route('movies.index')->with('success', 'Película eliminada');
     }
+    public function getFuncionesPorFecha(Request $request, $movieId)
+{
+    try {
+        $fecha = $request->query('fecha');
+        
+        // Validar que la fecha existe
+        if (!$fecha) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fecha no proporcionada'
+            ], 400);
+        }
+        
+        // Obtener funciones
+        $funciones = \App\Models\Funcion::where('movie_id', $movieId)
+            ->whereDate('hora', $fecha)
+            ->with(['sala'])
+            ->orderBy('hora', 'asc')
+            ->get();
+        
+        if ($funciones->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'empty' => true
+            ]);
+        }
+        
+        // Agrupar por nombre de sala
+        $salasPorFecha = $funciones->groupBy('sala.nombre_sala');
+        
+        $html = '';
+        
+        foreach ($salasPorFecha as $salaNombre => $funcionesSala) {
+            $html .= '<div class="cinema-card">';
+            $html .= '<div class="cinema-info">';
+            $html .= '<div class="cinema-name">🎭 ' . htmlspecialchars($salaNombre) . '</div>';
+            $html .= '<div class="cinema-address">📍 Sala Principal</div>';
+            $html .= '</div>';
+            $html .= '<div class="showtimes-grid">';
+            
+            foreach ($funcionesSala as $funcion) {
+                $hora = \Carbon\Carbon::parse($funcion->hora)->format('H:i');
+                
+                $html .= '<button class="showtime-btn" onclick="reservarFuncion(' . $funcion->id . ')">';
+                $html .= '<span class="showtime-time">' . $hora . '</span>';
+                $html .= '<span class="showtime-room">Sala ' . $funcion->sala_id . '</span>';
+                $html .= '</button>';
+            }
+            
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+        
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'empty' => false
+        ]);
+        
+    } catch (\Exception $e) {
+        // Log del error para debugging
+        \Log::error('Error en getFuncionesPorFecha: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar funciones',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }
