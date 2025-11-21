@@ -104,8 +104,7 @@
                                     @if($pelicula->ruta_imagen)
                                         <img src="{{ asset('storage/'.$pelicula->ruta_imagen) }}" 
                                              alt="{{ $pelicula->titulo }}" 
-                                             class="pelicula-thumbnail"
-                                             onerror="this.src='https://via.placeholder.com/100x150?text=Sin+Imagen'">
+                                             class="pelicula-thumbnail">
                                     @else
                                         <img src="https://via.placeholder.com/100x150?text=Sin+Imagen" 
                                              alt="Sin imagen" 

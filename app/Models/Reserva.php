@@ -21,9 +21,39 @@ class Reserva extends Model
         'funcion_id',        // Identificador de la función reservada (clave foránea)
         'usuario_id',        // Identificador del usuario que hizo la reserva (clave foránea)
         'cantidad_asientos', // Número de asientos reservados
-        'estado'             // Estado de la reserva (por ejemplo: confirmada, cancelada, pendiente, etc.)
+        'asientos',          // Array JSON con los asientos seleccionados ["A1", "A2", etc]
+        'precio_total',      // Precio total de la reserva
+        'estado',            // Estado de la reserva (pendiente, confirmada, cancelada, etc.)
+        'metodo_pago',      
+        'pago_id',          
+        'estado_pago',      
+        'fecha_pago',       
+        'detalles_pago',
+        'expires_at'
     ];
 
+    /**
+     * Conversión de tipos (casting)
+     * Convierte automáticamente el JSON a array y viceversa
+     */
+    protected $casts = [
+        'asientos' => 'array', // Convertir JSON a array automáticamente
+         'expires_at' => 'datetime',
+        'fecha_pago' => 'datetime',
+        'detalles_pago' => 'array',
+        'precio_total' => 'decimal:2'
+    ];
+    public function hasExpired()
+    {
+        return $this->expires_at && now()->greaterThan($this->expires_at);
+    }
+
+    // Método para verificar si está activa
+    public function isActive()
+    {
+        return $this->estado === 'confirmada' || 
+            ($this->estado === 'pendiente' && !$this->hasExpired());
+    }
     /**
      * Relación: una reserva pertenece a una función.
      * 
@@ -44,5 +74,15 @@ class Reserva extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    /**
+     * Relación: una reserva puede tener muchas sillas reservadas.
+     *
+     * hasMany → cada reserva puede incluir múltiples sillas específicas.
+     */
+    public function sillas()
+    {
+        return $this->hasMany(ReservaSilla::class, 'reserva_id');
     }
 }

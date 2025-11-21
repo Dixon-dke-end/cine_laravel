@@ -29,9 +29,12 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->role === 'admin') {
             return redirect()->route('movies.index');
-        }else if ($user->role === 'user'){
+        } else if ($user->role === 'user') {
             return redirect()->route('user.index');
         }
+        
+        // Por defecto, redirige al índice de usuarios
+        return redirect()->route('user.index');
     }
 
     /**

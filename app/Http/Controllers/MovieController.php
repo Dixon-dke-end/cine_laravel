@@ -68,21 +68,20 @@ class MovieController extends Controller
     /**
      * Muestra los detalles de una película específica con sus funciones disponibles.
      */
-    public function show(string $id)
-    {
-        // Busca la película con sus funciones y salas relacionadas
-        // findOrFail lanza un error 404 si no encuentra la película
-        $pelicula = Movie::with(['funciones.salas', 'funciones.reservas'])->findOrFail($id);
+    public function show($movieId) {
+        $movie = Movie::findOrFail($movieId);
         
-        // Obtiene solo las funciones futuras, ordenadas por hora
-        $funciones = $pelicula->funciones()
-            ->where('hora', '>', now())
-            ->with(['salas', 'reservas'])
+        // ✅ SOLUCIÓN: Cargar solo funciones desde HOY en adelante (próximos 14 días)
+        $fechaHoy = \Carbon\Carbon::now()->startOfDay();
+        $fechaFinal = \Carbon\Carbon::now()->addDays(14)->endOfDay();
+        
+        $funciones = Funcion::where('movie_id', $movieId)
+            ->whereBetween('hora', [$fechaHoy, $fechaFinal])
+            ->with(['sala'])
             ->orderBy('hora', 'asc')
             ->get();
         
-        // Retorna la vista con los datos
-        return view('movies.show', compact('pelicula', 'funciones'));
+        return view('funciones.show', compact('movie', 'funciones'));
     }
 
     /**

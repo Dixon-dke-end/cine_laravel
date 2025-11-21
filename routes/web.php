@@ -60,10 +60,53 @@ Route::resource('funciones', funcionesController::class); // CRUD de funciones (
 
 Route::resource('salas', salasController::class);         // CRUD de salas (espacios físicos)
 
-Route::resource('reservas', reservasController::class);   // CRUD de reservas (boletos o entradas)
+// Rutas de reservas (protegidas con autenticación)
+Route::middleware('auth')->group(function () {
+    Route::get('/reservas/create/{funcion_id}', [reservasController::class, 'create'])->name('reservas.create');
+    Route::post('/reservas', [reservasController::class, 'store'])->name('reservas.store');
+    Route::get('/reservas', [reservasController::class, 'index'])->name('reservas.index');
+    Route::get('/reservas/{id}', [reservasController::class, 'show'])->name('reservas.show');
+});
 
-Route::get('/reservas/{id}', [ReservasController::class, 'show'])->name('reservas.show');
-// Ruta para obtener funciones por fecha
-
+// Ruta para obtener funciones por fecha (AJAX)
 Route::get('/movies/{movie}/funciones-por-fecha', [MovieController::class, 'getFuncionesPorFecha'])
     ->name('movies.funciones-por-fecha');
+
+    // 👇 Rutas API para reservas (usando ReservaApiController)
+Route::middleware('auth')->group(function () {
+    // API para crear reservas desde JavaScript
+    Route::post('/api/reservas', [App\Http\Controllers\ReservaApiController::class, 'store'])
+        ->name('api.reservas.store');
+    
+    // API para obtener sillas de una función
+    Route::get('/api/funciones/{id}/sillas', [App\Http\Controllers\ReservaApiController::class, 'getSillas'])
+        ->name('api.funciones.sillas');
+});
+
+// Rutas de pago
+Route::middleware('auth')->group(function () {
+    // Página de checkout
+    Route::get('/pagos/checkout/{reserva_id}', [App\Http\Controllers\PagoController::class, 'mostrarPago'])
+        ->name('pagos.checkout');
+    
+    // Crear preferencia de Mercado Pago (AJAX)
+    Route::post('/pagos/mercadopago/preference/{reserva_id}', [App\Http\Controllers\PagoController::class, 'crearPreferenciaMercadoPago'])
+        ->name('pagos.mercadopago.preference');
+    
+    // URLs de retorno de Mercado Pago
+    Route::get('/pagos/success/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+        ->name('pagos.success');
+    
+    Route::get('/pagos/failure/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoFallido'])
+        ->name('pagos.failure');
+    
+    Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+        ->name('pagos.pending');
+});
+
+// Webhook de Mercado Pago (sin autenticación)
+Route::post('/webhooks/mercadopago', [App\Http\Controllers\PagoController::class, 'webhookMercadoPago'])
+    ->name('webhooks.mercadopago');
+
+        // Ruta para acceder a pagos
+

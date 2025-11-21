@@ -96,8 +96,7 @@
                             <div class="movie-poster-container">
                                 <img src="<?php echo e(asset('storage/'.$peli->ruta_imagen)); ?>" 
                                      alt="Imagen de <?php echo e($peli->titulo); ?>" 
-                                     class="movie-poster"
-                                     onerror="this.src='https://via.placeholder.com/320x400?text=Sin+Imagen'">
+                                     class="movie-poster">
                                 <div class="movie-overlay"></div>
                             </div>
                             

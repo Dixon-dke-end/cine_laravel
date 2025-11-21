@@ -109,8 +109,7 @@
                         <a href="<?php echo e(route('funciones.show', $movie->id)); ?>">
                         <img  src="<?php echo e(asset('storage/'.$movie->ruta_imagen)); ?>" 
                              alt="<?php echo e($movie->titulo); ?>" 
-                             class="movie-poster"
-                             onerror="this.src='https://via.placeholder.com/250x350?text=Sin+Imagen'">
+                             class="movie-poster">
                              </a>
                     </div>
                     

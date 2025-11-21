@@ -1,0 +1,15 @@
+SET FOREIGN_KEY_CHECKS = 0;
+DROP DATABASE IF EXISTS cine_laravel_backup;
+CREATE DATABASE cine_laravel_backup AS SELECT * FROM cine_laravel WHERE 1=0;
+DROP TABLE IF EXISTS cine_laravel.migrations;
+DROP TABLE IF EXISTS cine_laravel.password_reset_tokens;
+DROP TABLE IF EXISTS cine_laravel.reservas_sillas;
+DROP TABLE IF EXISTS cine_laravel.sillas;
+DROP TABLE IF EXISTS cine_laravel.reservas;
+DROP TABLE IF EXISTS cine_laravel.funciones;
+DROP TABLE IF EXISTS cine_laravel.movies;
+DROP TABLE IF EXISTS cine_laravel.salas;
+DROP TABLE IF EXISTS cine_laravel.jobs;
+DROP TABLE IF EXISTS cine_laravel.cache;
+DROP TABLE IF EXISTS cine_laravel.users;
+SET FOREIGN_KEY_CHECKS = 1;

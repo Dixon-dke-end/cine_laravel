@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $movie->titulo }} - Funciones Disponibles</title>
+    <title>{{ $movie->titulo }} - CineVel</title>
     <style>
         * {
             margin: 0;
@@ -13,20 +13,30 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             min-height: 100vh;
-            overflow-x: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: 500;
         }
 
         /* Navbar */
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             padding: 0;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .navbar-container {
@@ -35,154 +45,352 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
+            padding: 15px 40px;
         }
 
         .navbar-brand {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
-            letter-spacing: -1px;
         }
 
-        .btn-back {
-            padding: 10px 25px;
+        .navbar-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .navbar-menu a {
+            color: #555;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .navbar-menu a:hover,
+        .navbar-menu .active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #f0f2ff;
             border-radius: 25px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-auth {
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-login:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-logout {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-back:hover {
+        .btn-logout:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
-        /* Movie Header */
-        .movie-header {
+        /* Hero Section con Background */
+        .hero-section {
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: blur(8px);
+            transform: scale(1.1);
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                rgba(102, 126, 234, 0.4) 0%, 
+                rgba(118, 75, 162, 0.6) 50%,
+                rgba(102, 126, 234, 0.95) 100%);
+        }
+
+        /* Main Content */
+        .content-wrapper {
             max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 30px;
+            margin: -200px auto 0;
+            padding: 0 40px 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .movie-content {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: 40px;
             align-items: start;
         }
 
-        .left-column {
+        /* Poster Card */
+        .poster-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
             position: sticky;
-            top: 90px;
+            top: 100px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        .movie-poster-large {
+        .poster-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .movie-poster {
             width: 100%;
             border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
 
-        .movie-details {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .movie-title {
-            font-size: 2.5rem;
+        .cta-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .movie-badges {
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Info Section */
+        .info-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .movie-title-main {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .movie-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .movie-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .meta-item {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .meta-label {
+            font-size: 0.85rem;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            font-size: 1.05rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .badge {
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .badge-age {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .badge-genre {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        .movie-info-item {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .movie-info-label {
-            color: #ffd700;
-            font-weight: bold;
-            margin-right: 10px;
-            display: inline-block;
-        }
-
-        .movie-synopsis {
-            margin-top: 20px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-            padding-top: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .movie-synopsis p {
-            margin-top: 10px;
-        }
-
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        /* Trailer Section */
-        .trailer-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+        /* Synopsis */
+        .synopsis-section {
+            margin-bottom: 30px;
             padding: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
         }
 
-        .trailer-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .synopsis-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        /* Trailer */
+        .trailer-section {
+            margin-bottom: 35px;
+        }
+
+        .trailer-toggle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .trailer-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
         }
 
         .trailer-container {
+            margin-top: 20px;
+            display: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .trailer-container.active {
+            display: block;
+        }
+
+        .trailer-wrapper {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .trailer-container iframe {
+        .trailer-wrapper iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -191,61 +399,59 @@
             border: none;
         }
 
-        /* Schedule Section - MEJORADO */
+        /* Schedule Section */
         .schedule-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        .schedule-title {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .schedule-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-        }
-
-        /* Calendario de Días - CARRUSEL COMPACTO */
-        .calendar-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            max-width: 650px;
         }
 
-        .calendar-wrapper {
+        /* Calendar Carousel */
+        .calendar-carousel {
+            position: relative;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.15);
+        }
+
+        .carousel-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .carousel-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
             width: 45px;
             height: 45px;
             border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
-            color: white;
-            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .carousel-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #87ceeb;
-            transform: scale(1.1);
+        .carousel-btn:hover:not(:disabled) {
+            transform: scale(1.15);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
         }
 
         .carousel-btn:disabled {
@@ -254,397 +460,535 @@
             transform: none;
         }
 
-        .calendar-days-container {
+        .days-container {
             overflow: hidden;
             flex: 1;
-            max-width: 500px;
         }
 
-        .calendar-days {
+        .days-track {
             display: flex;
             gap: 12px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .day-card {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 12px 10px;
+        .day-item {
+            min-width: 110px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            padding: 18px 12px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: center;
-            min-width: 90px;
-            max-width: 90px;
             flex-shrink: 0;
+            color: #333;
         }
 
-        .day-card:hover:not(.disabled) {
-            transform: translateY(-3px);
-            border-color: #87ceeb;
-            background: rgba(255, 255, 255, 0.15);
+        .day-item:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            background: white;
         }
 
-        .day-card.active {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            border: 3px solid white;
-            box-shadow: 0 6px 20px rgba(30, 60, 114, 0.6);
-            transform: translateY(-3px);
-        }
-
-        .day-card.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: rgba(100, 100, 100, 0.2);
-            pointer-events: none;
+        .day-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5);
         }
 
         .day-name {
-            font-weight: 600;
             font-size: 0.85rem;
+            font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 5px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .day-card.active .day-name {
-            color: white;
-            font-weight: bold;
-        }
-
-        .day-number {
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin: 5px 0;
-            color: white;
-        }
-
-        .day-month {
-            font-size: 0.8rem;
             opacity: 0.7;
-            text-transform: lowercase;
+            margin-bottom: 8px;
         }
 
-        .day-card.active .day-month {
+        .day-item.active .day-name {
             opacity: 1;
         }
 
-        /* Cinema Cards - SIMPLIFICADO */
-        .cinema-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .cinema-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .cinema-info {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .cinema-name {
-            font-size: 1.4rem;
+        .day-number {
+            font-size: 2rem;
             font-weight: bold;
-            color: #fff;
             margin-bottom: 5px;
         }
 
+        .day-month {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: capitalize;
+        }
+
+        /* Cinema Accordion */
+        .cinema-accordion {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .cinema-header {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cinema-header:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        }
+
+        .cinema-header.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: none;
+        }
+
+        .cinema-info h3 {
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .cinema-header.active .cinema-info h3 {
+            color: white;
+        }
+
         .cinema-address {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .cinema-header.active .cinema-address {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .expand-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .cinema-header.active .expand-icon {
+            transform: rotate(180deg);
+            background: white;
+            color: #667eea;
+        }
+
+        .cinema-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .cinema-content.active {
+            max-height: 1000px;
+        }
+
+        .format-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .format-tab {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: white;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .format-tab:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .format-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .showtimes-grid {
+            padding: 25px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 15px;
         }
 
         .showtime-btn {
-            padding: 18px;
+            padding: 20px 15px;
+            background: white;
+            border: 2px solid #e0e4e8;
             border-radius: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .showtime-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .showtime-btn:disabled {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+            border-color: #667eea;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
         .showtime-time {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #1a1a1a;
             display: block;
+            margin-bottom: 5px;
         }
 
         .showtime-room {
             font-size: 0.85rem;
-            opacity: 0.9;
-            margin-top: 5px;
+            color: #888;
         }
 
+        .showtime-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f8f9fb;
+        }
+
+        .showtime-btn:disabled:hover {
+            transform: none;
+            border-color: #e0e4e8;
+            box-shadow: none;
+        }
+
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 40px;
-            background: rgba(255, 255, 255, 0.05);
+            background: #f8f9fb;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
         }
 
-        .empty-state-icon {
+        .empty-icon {
             font-size: 4rem;
             margin-bottom: 20px;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .empty-state h3 {
-            color: #ffd700;
+            font-size: 1.5rem;
+            color: #1a1a1a;
             margin-bottom: 10px;
-            font-size: 1.8rem;
         }
 
         .empty-state p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
+            color: #888;
+            font-size: 1rem;
         }
 
-        @media (max-width: 768px) {
-            .movie-header {
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f2ff;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .movie-content {
                 grid-template-columns: 1fr;
             }
 
-            .left-column {
+            .poster-card {
                 position: relative;
                 top: 0;
+                max-width: 400px;
+                margin: 0 auto;
             }
 
-            .movie-title {
+            .navbar-menu {
+                display: none;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .days-track {
+                gap: 8px;
+            }
+
+            .day-item {
+                min-width: 90px;
+                padding: 15px 8px;
+            }
+
+            .showtimes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar-container {
+                padding: 15px 20px;
+            }
+
+            .content-wrapper {
+                padding: 0 20px 40px;
+            }
+
+            .info-section,
+            .schedule-section {
+                padding: 25px 20px;
+            }
+
+            .movie-title-main {
                 font-size: 2rem;
-            }
-
-            .calendar-container {
-                max-width: 100%;
-            }
-
-            .calendar-days-container {
-                max-width: 100%;
-            }
-
-            .day-card {
-                min-width: 75px;
-                max-width: 75px;
-                padding: 10px 6px;
-            }
-
-            .day-number {
-                font-size: 1.4rem;
-            }
-
-            .day-name {
-                font-size: 0.75rem;
-            }
-
-            .day-month {
-                font-size: 0.7rem;
             }
 
             .carousel-btn {
                 width: 38px;
                 height: 38px;
-                font-size: 1rem;
-            }
-
-            .calendar-wrapper {
-                gap: 8px;
-            }
-
-            .showtimes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        ✨ Bienvenido a CineVel - Tu experiencia cinematográfica premium
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('user.index') }}" class="navbar-brand">
-                CINEVEL
-            </a>
-            <a href="{{ route('user.index') }}" class="btn-back">
-                ← Volver al Catálogo
-            </a>
+            <a href="{{ route('user.index') }}" class="navbar-brand">CINEVEL</a>
+            
+            <ul class="navbar-menu">
+                <li><a href="{{ route('user.index') }}">Películas</a></li>
+                <li><a href="#" class="active">Formatos de salas</a></li>
+                <li><a href="#">Servicios corporativos</a></li>
+                <li><a href="#">Ofertas y Noticias</a></li>
+                <li><a href="#">Alimentos</a></li>
+                <li><a href="#">Cine Fans</a></li>
+            </ul>
+
+            <div class="navbar-user">
+                @guest
+                    <a href="{{ route('login') }}" class="btn-auth btn-login">INICIAR SESIÓN</a>
+                @else
+                    @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('movies.index') }}" class="btn-auth" style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 2px solid #ffc107;">
+                            🔧 Admin
+                        </a>
+                    @endif
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                        <span class="user-name">{{ Auth::user()->name }}</span>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn-auth btn-logout">CERRAR SESIÓN</button>
+                    </form>
+                @endguest
+            </div>
         </div>
     </nav>
 
-    <!-- Movie Header with 2 Columns -->
-    <div class="movie-header">
-        <!-- Left Column: Poster + Details -->
-        <div class="left-column">
-            <img src="{{ asset('storage/' . $movie->ruta_imagen) }}" 
-                 alt="{{ $movie->titulo }}" 
-                 class="movie-poster-large"
-                 onerror="this.src='https://via.placeholder.com/400x600?text={{ $movie->titulo }}'">
-            
-            <div class="movie-details">
-                <h1 class="movie-title">{{ $movie->titulo }}</h1>
-                
-                <div class="movie-badges">
-                    <span class="badge badge-age">{{ $movie->age_suggest }}</span>
-                    <span class="badge badge-genre">{{ $movie->genero }}</span>
+    <!-- Hero Background -->
+    <div class="hero-section">
+        <div class="hero-background" style="background-image: url('{{ asset('storage/' . $movie->ruta_imagen) }}');"></div>
+        <div class="hero-overlay"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="movie-content">
+            <!-- Left: Poster Card -->
+            <div class="poster-card">
+                <div class="poster-badge">Cartelera</div>
+                <img src="{{ asset('storage/' . $movie->ruta_imagen) }}" 
+                     alt="{{ $movie->titulo }}" 
+                     class="movie-poster">
+                <button class="cta-button" onclick="scrollToSchedule()">
+                    🎟️ Comprar Boletos
+                </button>
+            </div>
+
+            <!-- Right: Info -->
+            <div class="info-section">
+                <h1 class="movie-title-main">{{ $movie->titulo }}</h1>
+
+                <!-- Meta Grid -->
+                <div class="movie-meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Clasificación</span>
+                        <div class="badge-container">
+                            <span class="badge badge-age">{{ $movie->age_suggest }}</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Duración</span>
+                        <span class="meta-value">{{ $movie->duracion }} Minutos</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Género</span>
+                        <div class="badge-container">
+                            <span class="badge badge-genre">{{ $movie->genero }}</span>
+                        </div>
+                    </div>
+                    @if($movie->año)
+                    <div class="meta-item">
+                        <span class="meta-label">año de estreno</span>
+                        <span class="meta-value">{{ $movie->año }}</span>
+                    </div>
+                    @endif
+                    @if($movie->autor)
+                    <div class="meta-item">
+                        <span class="meta-label">Director</span>
+                        <span class="meta-value">{{ $movie->autor }}</span>
+                    </div>
+                    @endif
                 </div>
 
-                <div class="movie-info-item">
-                    <span class="movie-info-label">📝 TÍTULO ORIGINAL</span>
-                    <span>{{ $movie->titulo }}</span>
-                </div>
-
-                @if($movie->autor)
-                <div class="movie-info-item">
-                    <span class="movie-info-label">🎬 DIRECTOR</span>
-                    <span>{{ $movie->autor }}</span>
-                </div>
-                @endif
-
-                @if($movie->duracion)
-                <div class="movie-info-item">
-                    <span class="movie-info-label">⏱️ DURACIÓN</span>
-                    <span>{{ $movie->duracion }} minutos</span>
-                </div>
-                @endif
-
-                @if($movie->año)
-                <div class="movie-info-item">
-                    <span class="movie-info-label">📅 AÑO</span>
-                    <span>{{ $movie->año }}</span>
-                </div>
-                @endif
-
+                <!-- Synopsis -->
                 @if($movie->descripcion)
-                <div class="movie-synopsis">
-                    <span class="movie-info-label">📄 SINOPSIS</span>
-                    <p>{{ $movie->descripcion }}</p>
+                <div class="synopsis-section">
+                    <h2 class="section-title">📖 Sinopsis</h2>
+                    <p class="synopsis-text">{{ $movie->descripcion }}</p>
+                </div>
+                @endif
+
+                <!-- Trailer -->
+                @if($movie->trailer_url)
+                <div class="trailer-section">
+                    <button class="trailer-toggle" onclick="toggleTrailer()">
+                        🎬 Ver el trailer de la película
+                    </button>
+                    <div class="trailer-container" id="trailerContainer">
+                        <div class="trailer-wrapper">
+                            <iframe src="{{ $movie->trailer_url }}" 
+                                    allowfullscreen
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                            </iframe>
+                        </div>
+                    </div>
                 </div>
                 @endif
             </div>
         </div>
 
-        <!-- Right Column: Trailer + Schedule -->
-        <div class="right-column">
-            <!-- Trailer Section -->
-            @if($movie->trailer_url)
-            <div class="trailer-section">
-                <h2 class="trailer-title">🎥 Trailer Oficial</h2>
-                <div class="trailer-container">
-                    <iframe 
-                        src="{{ $movie->trailer_url }}" 
-                        allowfullscreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-                    </iframe>
+        <!-- Schedule Section -->
+        <div class="schedule-section" id="scheduleSection">
+            <div class="schedule-header">
+                <h2 class="section-title">🎬 Horarios y Boletos</h2>
+            </div>
+
+            @php
+                $fechaHoy = \Carbon\Carbon::now()->format('Y-m-d');
+                $fechasCalendario = collect();
+                for ($i = -1; $i < 14; $i++) {
+                    $fechasCalendario->push(\Carbon\Carbon::now()->addDays($i)->format('Y-m-d'));
+                }
+                $fechasConFunciones = $funciones->pluck('hora')
+                    ->map(fn($h) => \Carbon\Carbon::parse($h)->format('Y-m-d'))
+                    ->unique()
+                    ->values();
+            @endphp
+
+            <!-- Calendar Carousel -->
+            <div class="calendar-carousel">
+                <div class="carousel-wrapper">
+                    <button class="carousel-btn" id="prevBtn" onclick="moveCarousel(-1)">◄</button>
+                    
+                    <div class="days-container">
+                        <div class="days-track" id="daysTrack">
+                            @foreach($fechasCalendario as $index => $fecha)
+                                @php
+                                    $carbon = \Carbon\Carbon::parse($fecha);
+                                    $esHoy = $fecha === $fechaHoy;
+                                @endphp
+                                <div class="day-item {{ $esHoy ? 'active' : '' }}" 
+                                     data-fecha="{{ $fecha }}"
+                                     onclick="selectDay(this)">
+                                    <div class="day-name">{{ $carbon->locale('es')->isoFormat('ddd') }}</div>
+                                    <div class="day-number">{{ $carbon->format('d') }}</div>
+                                    <div class="day-month">{{ $carbon->locale('es')->isoFormat('MMM') }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button class="carousel-btn" id="nextBtn" onclick="moveCarousel(1)">►</button>
                 </div>
             </div>
-            @endif
 
-            <!-- Schedule Section con Calendario -->
-            <div class="schedule-section">
-                <h2 class="schedule-title">
-                    📅 Selecciona un día para ver las funciones
-                </h2>
-
+            <!-- Cinema List -->
+            <div id="cinemaList">
                 @php
-                    // Obtener todas las fechas únicas con funciones
-                    $todasLasFechas = $funciones->pluck('hora')
-                        ->map(function($hora) {
-                            return \Carbon\Carbon::parse($hora)->format('Y-m-d');
-                        })
-                        ->unique()
-                        ->sort()
-                        ->values();
-
-                    // Crear un rango de 14 días desde hoy, le reste -1 al for para que no sea desde hoy sino desde el mismo dia porque no estaba tomando en cuenta el dia de hoy :D
-                    $fechasCalendario = collect();
-                    for ($i = -1; $i < 14; $i++) {
-                        $fechasCalendario->push(\Carbon\Carbon::now()->addDays($i)->format('Y-m-d'));
-                    }
+                    $funcionesHoy = $funciones->filter(fn($f) => \Carbon\Carbon::parse($f->hora)->format('Y-m-d') === $fechaHoy)
+                        ->groupBy('sala.nombre_sala');
                 @endphp
 
-                <!-- Calendario de Días con Carrusel -->
-                <div class="calendar-container">
-                    <div class="calendar-wrapper">
-                        <button class="carousel-btn" id="prevBtn" onclick="moveCarousel(-1)">
-                            ◄
-                        </button>
-                        
-                        <div class="calendar-days-container">
-                            <div class="calendar-days" id="calendarDays">
-                                @foreach($fechasCalendario as $index => $fecha)
-                                    @php
-                                        $carbon = \Carbon\Carbon::parse($fecha);
-                                        $tieneFunciones = $todasLasFechas->contains($fecha);
-                                    @endphp
-                                    
-                                    <div class="day-card {{ $index === 0 && $tieneFunciones ? 'active' : '' }}" 
-                                         data-fecha="{{ $fecha }}"
-                                         data-tiene-funciones="{{ $tieneFunciones ? 'true' : 'false' }}"
-                                         onclick="selectDay(this)">
-                                        <div class="day-name">{{ $carbon->locale('es')->isoFormat('ddd') }}</div>
-                                        <div class="day-number">{{ $carbon->format('d') }}</div>
-                                        <div class="day-month">{{ $carbon->locale('es')->isoFormat('MMM') }}</div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <button class="carousel-btn" id="nextBtn" onclick="moveCarousel(1)">
-                            ►
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Lista de Cines y Funciones -->
-                <div class="cinema-list" id="cinemaList">
-                    @php
-                        // Mostrar funciones del primer día por defecto
-                        $primeraFecha = $todasLasFechas->first();
-                        $funcionesPrimerDia = $funciones->filter(function($funcion) use ($primeraFecha) {
-                            return \Carbon\Carbon::parse($funcion->hora)->format('Y-m-d') === $primeraFecha;
-                        })->groupBy('sala.nombre_sala');
-                    @endphp
-
-                    @if($funcionesPrimerDia->count() > 0)
-                        @foreach($funcionesPrimerDia as $salaNombre => $funcionesSala)
-                            <div class="cinema-card">
+                @if($funcionesHoy->count() > 0)
+                    @foreach($funcionesHoy as $salaNombre => $funcionesSala)
+                        <div class="cinema-accordion">
+                            <div class="cinema-header {{ $loop->first ? 'active' : '' }}" onclick="toggleCinema(this)">
                                 <div class="cinema-info">
-                                    <div class="cinema-name">🎭 {{ $salaNombre }}</div>
-                                    <div class="cinema-address">📍 Sala Principal</div>
+                                    <h3>{{ $salaNombre }}</h3>
+                                    <p class="cinema-address">📍 {{ $funcionesSala->first()->sala->ubicacion ?? 'Ubicación Principal' }}</p>
                                 </div>
-
+                                <div class="expand-icon">▼</div>
+                            </div>
+                            <div class="cinema-content {{ $loop->first ? 'active' : '' }}">
+                                <div class="format-tabs">
+                                    <button class="format-tab active">Todos</button>
+                                    <button class="format-tab">2D Doblada</button>
+                                </div>
                                 <div class="showtimes-grid">
                                     @foreach($funcionesSala as $funcion)
                                     <button class="showtime-btn" 
-                                            href="{{route('reservas.show', $funcion->id )}}"
+                                            onclick="reservarFuncion({{ $funcion->id}})"
                                             {{ ($funcion->disponible ?? true) ? '' : 'disabled' }}>
                                         <span class="showtime-time">
                                             {{ \Carbon\Carbon::parse($funcion->hora)->format('H:i') }}
@@ -654,96 +998,94 @@
                                     @endforeach
                                 </div>
                             </div>
-                        @endforeach
-                    @else
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🎬</div>
-                            <h3>No hay funciones disponibles</h3>
-                            <p>Selecciona otro día para ver las funciones disponibles</p>
                         </div>
-                    @endif
-                </div>
+                    @endforeach
+                @else
+                    <div class="empty-state">
+                        <div class="empty-icon">🎬</div>
+                        <h3>No hay funciones disponibles</h3>
+                        <p>Selecciona otro día para ver las funciones disponibles</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
     <script>
         let currentPosition = 0;
-        const cardsPerPage = 4; // Mostrar solo 4 tarjetas a la vez
+        const cardsPerPage = 5;
 
-        // Mover carrusel
-        function moveCarousel(direction) {
-            const container = document.getElementById('calendarDays');
-            const cards = container.querySelectorAll('.day-card');
-            const totalCards = cards.length;
-            
-            if (cards.length === 0) return;
-            
-            const cardWidth = cards[0].offsetWidth + 12; // width + gap
-
-            // Calcular nueva posición
-            currentPosition += direction;
-            
-            // Limitar el rango
-            const maxPosition = Math.max(0, totalCards - cardsPerPage);
-            currentPosition = Math.max(0, Math.min(currentPosition, maxPosition));
-
-            // Aplicar transformación
-            container.style.transform = `translateX(-${currentPosition * cardWidth}px)`;
-
-            // Actualizar botones
-            updateCarouselButtons(totalCards);
+        // Toggle Trailer
+        function toggleTrailer() {
+            const container = document.getElementById('trailerContainer');
+            container.classList.toggle('active');
         }
 
-        // Actualizar estado de botones del carrusel
-        function updateCarouselButtons(totalCards) {
+        // Scroll to Schedule
+        function scrollToSchedule() {
+            document.getElementById('scheduleSection').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Carousel Navigation
+        function moveCarousel(direction) {
+            const track = document.getElementById('daysTrack');
+            const items = track.querySelectorAll('.day-item');
+            const totalItems = items.length;
+            
+            if (items.length === 0) return;
+            
+            const itemWidth = items[0].offsetWidth + 12;
+            currentPosition += direction;
+            
+            const maxPosition = Math.max(0, totalItems - cardsPerPage);
+            currentPosition = Math.max(0, Math.min(currentPosition, maxPosition));
+            
+            track.style.transform = `translateX(-${currentPosition * itemWidth}px)`;
+            updateCarouselButtons(totalItems);
+        }
+
+        function updateCarouselButtons(totalItems) {
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             
             prevBtn.disabled = currentPosition === 0;
-            nextBtn.disabled = currentPosition >= totalCards - cardsPerPage;
+            nextBtn.disabled = currentPosition >= totalItems - cardsPerPage;
         }
 
-        // Seleccionar día con AJAX
-        function selectDay(dayCard) {
-            // Actualizar día activo
-            document.querySelectorAll('.day-card').forEach(card => {
-                card.classList.remove('active');
+        // Select Day
+        function selectDay(dayItem) {
+            document.querySelectorAll('.day-item').forEach(item => {
+                item.classList.remove('active');
             });
-            dayCard.classList.add('active');
+            dayItem.classList.add('active');
 
-            // Obtener fecha seleccionada
-            const fechaSeleccionada = dayCard.dataset.fecha;
+            const fecha = dayItem.dataset.fecha;
+            const movieId = window.location.pathname.split('/').pop();
             
-            // Obtener movie_id de la URL actual
-            const urlParts = window.location.pathname.split('/');
-            const movieId = urlParts[urlParts.length - 1];
-            
-            // Mostrar loading
             const cinemaList = document.getElementById('cinemaList');
             cinemaList.innerHTML = `
-                <div style="text-align: center; padding: 60px;">
-                    <div style="font-size: 3rem; margin-bottom: 20px;">⏳</div>
-                    <h3 style="color: #ffd700;">Cargando funciones...</h3>
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <h3 style="color: #667eea;">Cargando funciones...</h3>
                 </div>
             `;
 
-            // Hacer petición AJAX
-            fetch(`/movies/${movieId}/funciones-por-fecha?fecha=${fechaSeleccionada}`)
+            fetch(`/movies/${movieId}/funciones-por-fecha?fecha=${fecha}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         if (data.empty) {
-                            // Mostrar mensaje vacío
                             cinemaList.innerHTML = `
                                 <div class="empty-state">
-                                    <div class="empty-state-icon">🎬</div>
+                                    <div class="empty-icon">🎬</div>
                                     <h3>No hay funciones disponibles</h3>
                                     <p>Selecciona otro día para ver las funciones disponibles</p>
                                 </div>
                             `;
                         } else {
-                            // Mostrar funciones
                             cinemaList.innerHTML = data.html;
                         }
                     }
@@ -752,7 +1094,7 @@
                     console.error('Error:', error);
                     cinemaList.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-icon">⚠️</div>
                             <h3>Error al cargar funciones</h3>
                             <p>Por favor, intenta nuevamente</p>
                         </div>
@@ -760,38 +1102,53 @@
                 });
         }
 
-        // Reservar función
-        function reservarFuncion(funcionId) {
-            if (confirm('¿Deseas reservar esta función?')) {
-                window.location.href = `/reservas/create/${funcionId}`;
+        // Toggle Cinema Accordion
+        function toggleCinema(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+            
+            // Close all
+            document.querySelectorAll('.cinema-header').forEach(h => {
+                h.classList.remove('active');
+                h.nextElementSibling.classList.remove('active');
+            });
+            
+            // Open clicked if it wasn't active
+            if (!isActive) {
+                header.classList.add('active');
+                content.classList.add('active');
             }
         }
 
-        // Inicialización
+        // Reserve Function
+        function reservarFuncion(funcionId) {
+                window.location.href = `/reservas/create/${funcionId}`;
+        }
+
+        // Initialize
         window.addEventListener('load', () => {
-            // Auto-seleccionar el primer día con funciones
-            const primerDiaConFunciones = document.querySelector('.day-card:not(.disabled)');
-            if (primerDiaConFunciones && !primerDiaConFunciones.classList.contains('active')) {
-                selectDay(primerDiaConFunciones);
+            const items = document.querySelectorAll('.day-item');
+            updateCarouselButtons(items.length);
+
+            // Auto-open first cinema
+            const firstCinema = document.querySelector('.cinema-header');
+            if (firstCinema && !firstCinema.classList.contains('active')) {
+                firstCinema.classList.add('active');
+                firstCinema.nextElementSibling.classList.add('active');
             }
 
-            // Actualizar botones del carrusel
-            const cards = document.querySelectorAll('.day-card');
-            updateCarouselButtons(cards.length);
-
-            // Ajustar carrusel en resize
+            // Adjust carousel on resize
             window.addEventListener('resize', () => {
-                const container = document.getElementById('calendarDays');
-                const cards = container.querySelectorAll('.day-card');
-                if (cards.length > 0) {
-                    const cardWidth = cards[0].offsetWidth + 12;
-                    // Recalcular posición si es necesario
-                    const maxPosition = Math.max(0, cards.length - cardsPerPage);
+                const track = document.getElementById('daysTrack');
+                const items = track.querySelectorAll('.day-item');
+                if (items.length > 0) {
+                    const itemWidth = items[0].offsetWidth + 12;
+                    const maxPosition = Math.max(0, items.length - cardsPerPage);
                     if (currentPosition > maxPosition) {
                         currentPosition = maxPosition;
                     }
-                    container.style.transform = `translateX(-${currentPosition * cardWidth}px)`;
-                    updateCarouselButtons(cards.length);
+                    track.style.transform = `translateX(-${currentPosition * itemWidth}px)`;
+                    updateCarouselButtons(items.length);
                 }
             });
         });

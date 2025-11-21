@@ -27,5 +27,15 @@ class Sala extends Model
     {
         return $this->hasMany(Funcion::class, 'sala_id');
     }
+
+    /**
+     * Relación: una sala tiene muchas sillas.
+     *
+     * hasMany → cada sala contiene múltiples sillas individuales.
+     */
+    public function sillas()
+    {
+        return $this->hasMany(Silla::class, 'sala_id');
+    }
 }
 

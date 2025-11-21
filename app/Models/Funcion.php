@@ -50,4 +50,35 @@ use App\Models\Reserva;
     {
         return $this->hasMany(Reserva::class, 'funcion_id');
     }
+
+    /**
+     * Obtiene todas las sillas ocupadas para esta función.
+     *
+     * Retorna las sillas que fueron reservadas para esta función específica.
+     */
+    public function shillasOcupadas()
+    {
+        return Silla::whereHas('reservasSillas', function ($query) {
+            $query->whereHas('reserva', function ($q) {
+                $q->where('funcion_id', $this->id);
+            });
+        })->get();
+    }
+
+    /**
+     * Obtiene todas las sillas de la sala con estado de ocupación para esta función.
+     */
+    public function sillasConEstado()
+    {
+        return $this->Sala()->first()->sillas()->get()->map(function ($silla) {
+            return [
+                'id' => $silla->id,
+                'fila' => $silla->fila,
+                'numero' => $silla->numero,
+                'tipo' => $silla->tipo,
+                'nombre' => $silla->nombre,
+                'ocupada' => $silla->estaOcupadaPara($this->id)
+            ];
+        });
+    }
 }

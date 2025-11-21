@@ -1,0 +1,219 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║         ¿QUÉ HACE CONFIRMARRESERVA()? - EXPLICACIÓN VISUAL              ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 LO QUE PREGUNTASTE
+
+"No entiendo el confirmar reserva, me imagino que lleva al controlador 
+api de las sillas o el de reservas pero explicamelo"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ RESPUESTA CORTA
+
+Va a: ReservaApiController@store() 
+NO a: SillaApiController
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 UBICACIÓN DEL CÓDIGO
+
+Archivo:  resources/views/reservas/create.blade.php
+Línea:    ~850-900
+Función:  confirmarReserva()
+Evento:   onclick="confirmarReserva()"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 EL FLUJO PASO A PASO
+
+1️⃣  USUARIO PRESIONA BOTÓN
+    ├─ Botón: <button onclick="confirmarReserva()">CONTINUAR →</button>
+    ├─ Sillas seleccionadas: 5, 6, 7 (3 sillas)
+    └─ JavaScript ejecuta: confirmarReserva()
+
+2️⃣  JAVASCRIPT VALIDA
+    ├─ if (selectedSeats.size === 0) return;
+    ├─ Verifica que hay sillas: SÍ ✅
+    └─ Continúa...
+
+3️⃣  JAVASCRIPT MUESTRA FEEDBACK
+    ├─ confirmBtn.disabled = true;
+    ├─ confirmBtn.textContent = '⏳ PROCESANDO...';
+    └─ Resultado: Botón se desactiva
+
+4️⃣  JAVASCRIPT HACE POST
+    ├─ fetch('/api/reservas', {
+    │   method: 'POST',
+    │   body: {
+    │     funcion_id: 1,
+    │     sillas_ids: [5, 6, 7],
+    │     precio_total: 22500
+    │   }
+    │ })
+    └─ Envía datos al servidor
+
+5️⃣  BACKEND RECIBE EN ROUTAS/API.PHP
+    ├─ Route::post('/api/reservas', [ReservaApiController::class, 'store'])
+    ├─ Busca: ¿POST a /api/reservas? SÍ
+    ├─ Encuentra: ReservaApiController@store()
+    └─ Ejecuta ese método
+
+6️⃣  RESERVACONTROLLER@STORE() SE EJECUTA
+    ├─ Valida datos
+    ├─ Crea en tabla 'reservas'
+    │  INSERT INTO reservas
+    │  (funcion_id, usuario_id, cantidad_asientos, precio_total, estado)
+    │  VALUES (1, 5, 3, 22500, 'pendiente')
+    │
+    ├─ Crea en tabla 'reservas_sillas' (1 por cada silla)
+    │  INSERT INTO reservas_sillas (reserva_id, silla_id) VALUES (1, 5)
+    │  INSERT INTO reservas_sillas (reserva_id, silla_id) VALUES (1, 6)
+    │  INSERT INTO reservas_sillas (reserva_id, silla_id) VALUES (1, 7)
+    │
+    ├─ Commit transacción (guarda todo)
+    └─ Retorna JSON: {"success": true, "reserva": {...}}
+
+7️⃣  JAVASCRIPT RECIBE RESPUESTA
+    ├─ const data = response.json();
+    ├─ if (data.success) {
+    │   window.location.href = '/mis-reservas?success=true';
+    │ }
+    └─ Redirige a página de confirmación
+
+8️⃣  USUARIO VE
+    ├─ Página: /mis-reservas
+    ├─ Muestra: "Reserva confirmada"
+    ├─ Asientos: A5, A6, A7
+    └─ Estado: Pendiente de confirmación
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 LOS 6 PASOS DEL CÓDIGO JAVASCRIPT
+
+┌─────────────────────────────────────────────────────────────┐
+│ async function confirmarReserva() {                         │
+│                                                             │
+│ PASO 1: VALIDAR                                            │
+│ ───────────────────────────────────────────────────────    │
+│   if (selectedSeats.size === 0) return;                    │
+│   // Si no hay sillas: salir                               │
+│                                                             │
+│ PASO 2: UI FEEDBACK                                        │
+│ ───────────────────────────────────────────────────────    │
+│   confirmBtn.disabled = true;                              │
+│   confirmBtn.textContent = '⏳ PROCESANDO...';             │
+│   // Mostrar al usuario que estamos procesando             │
+│                                                             │
+│ PASO 3: HACER POST                                         │
+│ ───────────────────────────────────────────────────────    │
+│   const response = await fetch('/api/reservas', {          │
+│       method: 'POST',                                       │
+│       headers: {                                            │
+│           'Content-Type': 'application/json',               │
+│           'X-CSRF-TOKEN': csrfToken                        │
+│       },                                                    │
+│       body: JSON.stringify({                               │
+│           funcion_id: funcionId,     // 1                  │
+│           sillas_ids: [5,6,7],       // Array              │
+│           precio_total: 22500        // Cálculo            │
+│       })                                                    │
+│   });                                                       │
+│   // Enviar datos al servidor                              │
+│                                                             │
+│ PASO 4: PROCESAR RESPUESTA                                │
+│ ───────────────────────────────────────────────────────    │
+│   const data = await response.json();                      │
+│   // Convertir respuesta a JSON                            │
+│                                                             │
+│ PASO 5: ÉXITO                                              │
+│ ───────────────────────────────────────────────────────    │
+│   if (data.success) {                                       │
+│       window.location.href = '/mis-reservas?success=true'; │
+│       // Redirigir a confirmación                          │
+│   }                                                         │
+│                                                             │
+│ PASO 6: ERROR (MANEJO)                                     │
+│ ───────────────────────────────────────────────────────    │
+│   else {                                                    │
+│       alert(data.message);           // Mostrar error      │
+│       confirmBtn.disabled = false;    // Reactivar botón   │
+│   }                                                         │
+│ }                                                           │
+└─────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚦 ¿A QUÉ CONTROLADOR VA?
+
+┌─────────────────────────────────────────────────────────────┐
+│  SillaApiController  - ❌ NO                                │
+│  ──────────────────────────────────                        │
+│  Rutas que maneja:                                          │
+│  ├─ GET /api/funciones/1/sillas                           │
+│  └─ GET /api/salas/1/sillas                               │
+│  Qué hace: LEE y retorna lista de sillas                   │
+│                                                             │
+│  ReservaApiController - ✅ SÍ                              │
+│  ─────────────────────────────────                        │
+│  Rutas que maneja:                                          │
+│  ├─ POST /api/reservas             (CREATE)               │
+│  ├─ GET /api/reservas/{id}         (READ)                 │
+│  ├─ POST /api/reservas/{id}/cancelar (DELETE)            │
+│  └─ GET /api/mis-reservas          (LIST)                 │
+│  Qué hace: ESCRIBE, LEE y CANCELA reservas                │
+└─────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 QUÉ SE GUARDA EN LA BD
+
+Tabla: reservas
+  ┌──┬──────────┬──────────┬───────────────┬──────────────┬───────────┐
+  │id│funcion_id│usuario_id│cantidad_sillas│precio_total  │  estado   │
+  ├──┼──────────┼──────────┼───────────────┼──────────────┼───────────┤
+  │ 1│    1     │    5     │      3        │   22500.00   │ pendiente │
+  └──┴──────────┴──────────┴───────────────┴──────────────┴───────────┘
+
+Tabla: reservas_sillas
+  ┌────────────┬──────────┐
+  │ reserva_id │ silla_id │
+  ├────────────┼──────────┤
+  │      1     │    5     │
+  │      1     │    6     │
+  │      1     │    7     │
+  └────────────┴──────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 CÓMO VERIFICAR QUE FUNCIONA
+
+1. Abre navegador: F12 (Developer Tools)
+2. Tab: Network
+3. Presiona: CONTINUAR →
+4. Busca en Network: POST /api/reservas
+5. Verifica:
+   ├─ Status: 200 OK ✅
+   ├─ Response: {"success": true}
+   └─ BD: Datos guardados
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 RESUMEN
+
+¿QUÉ?        confirmarReserva() - Función JavaScript
+¿DÓNDE?      resources/views/reservas/create.blade.php
+¿CUÁNDO?     onClick del botón CONTINUAR →
+¿A QUIÉN?    ReservaApiController@store()
+¿RUTA?       POST /api/reservas
+¿QUID HACE?  Envía datos al backend
+¿BACKEND?    Crea en BD
+¿RESULTADO?  Redirige a /mis-reservas
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          ¿ENTENDIDO? 🎉                                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝

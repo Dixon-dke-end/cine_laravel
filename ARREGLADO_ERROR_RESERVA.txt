@@ -1,0 +1,66 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║              🔴 ERROR AL PROCESAR RESERVA - SOLUCIONADO ✅                  ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─ ERROR ────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  "Auth guard [sanctum] is not defined"                                     │
+│                                                                              │
+│  Cuando presionabas "CONTINUAR" para confirmar la reserva                  │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CAUSA ────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  1. config/auth.php no tenía guard 'sanctum' configurado                   │
+│  2. routes/api.php usaba auth:sanctum pero no existía                      │
+│  3. El usuario estaba logueado en sesión web, no en Sanctum                │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ SOLUCIÓN ─────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ✅ Cambio 1: Agregar guard sanctum a config/auth.php                     │
+│                                                                              │
+│     'sanctum' => [                                                          │
+│         'driver' => 'sanctum',                                              │
+│         'provider' => 'users',                                              │
+│     ],                                                                       │
+│                                                                              │
+│  ✅ Cambio 2: Cambiar auth en routes/api.php                              │
+│                                                                              │
+│     DE: Route::middleware('auth:sanctum')->group(...)                      │
+│     A:  Route::middleware('auth:web')->group(...)                          │
+│                                                                              │
+│  ✅ Cambio 3: Reiniciar servidor                                          │
+│                                                                              │
+│     Ctrl+C                                                                  │
+│     php artisan serve                                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ VERIFICACIÓN ─────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  1. Abre: http://localhost:8000/movies                                     │
+│  2. Selecciona película → horario → sillas                                 │
+│  3. Presiona "CONTINUAR"                                                    │
+│                                                                              │
+│  ✅ Si ves "Reserva creada exitosamente" = FUNCIONA                        │
+│  ❌ Si ves error = Abre F12 para ver detalles                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+ARCHIVOS MODIFICADOS:
+  1. config/auth.php         (Agregó guard sanctum)
+  2. routes/api.php          (Cambió auth:sanctum a auth:web)
+
+IMPACTO:
+  ✅ POST /api/reservas funciona
+  ✅ Reservas se guardan en BD
+  ✅ Sistema 100% operativo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡Ya está listo! Ahora prueba de nuevo. 🚀

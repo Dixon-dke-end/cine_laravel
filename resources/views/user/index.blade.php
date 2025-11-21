@@ -108,8 +108,7 @@
                         <a href="{{ route('funciones.show', $movie->id) }}">
                         <img  src="{{ asset('storage/'.$movie->ruta_imagen) }}" 
                              alt="{{ $movie->titulo }}" 
-                             class="movie-poster"
-                             onerror="this.src='https://via.placeholder.com/250x350?text=Sin+Imagen'">
+                             class="movie-poster">
                              </a>
                     </div>
                     

@@ -60,7 +60,10 @@
                     <label for="descripcion">📄 Descripción</label>
                     <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
                 </div>
-
+                <div class="form-group">
+                    <label for="url">📄 Url</label>
+                    <textarea id="trailer_url" name="trailer_url">{{ $registro->trailer_url }}</textarea>
+                </div>
                 <div class="form-group">
                     <label for="duracion">⏱️ Duración (minutos)</label>
                     <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">

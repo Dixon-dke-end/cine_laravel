@@ -1,1 +1,0 @@
-asd<?php /**PATH C:\backup\cine_laravel\resources\views/user/funciones.blade.php ENDPATH**/ ?>
