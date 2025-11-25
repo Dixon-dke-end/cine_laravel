@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Película</title>
+    <title>Editar Producto Confitería</title>
     @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
     <style>
         body {
@@ -127,22 +127,6 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="{{ route('movies.index') }}" class="navbar-brand">
-                🎬 CineVel (Admin)
-            </a>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                @auth
-                    
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
-                        📊 Dashboard
-                    </a>
-                    
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-logout">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
@@ -157,16 +141,30 @@
     <div class="main-container">
         <!-- Sidebar Acordeón -->
         <aside class="sidebar">
-            <div class="sidebar-title">Menú Principal</div>
+            <div class="sidebar-title">Menú Confitería</div>
 
             @auth
-                <!-- Sección Películas -->
+                <!-- Sección Confitería -->
                 <div class="accordion-item">
                     <button class="accordion-header active" onclick="toggleAccordion(this)">
-                        <span>🎬 Películas</span>
+                        <span>🍿 Confitería</span>
                         <span class="accordion-icon">▼</span>
                     </button>
                     <div class="accordion-content active">
+                        <div class="accordion-links">
+                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Películas -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🎬 Películas</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
                         <div class="accordion-links">
                             <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
                             <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
@@ -184,20 +182,6 @@
                         <div class="accordion-links">
                             <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
                             <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Confitería -->
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>🍿 Confitería</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
@@ -237,70 +221,48 @@
     <div class="container">
         <div class="form-card">
             <div class="header">
-                <h1>✏️ Editar Película</h1>
-                <p class="subtitle">Actualiza la información de tu película</p>
+                <h1>✏️ Editar Producto de Confitería</h1>
+                <p class="subtitle">Actualiza la información del producto</p>
             </div>
 
-            <form action="{{ route('movies.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('confiteria.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
                 <div class="form-group">
-                    <label for="titulo">📝 Título</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ $registro->titulo }}" required>
+                    <label for="nombre">📝 Nombre del Producto</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ $registro->nombre }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="descripcion">📄 Descripción</label>
                     <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
                 </div>
+
                 <div class="form-group">
-                    <label for="url">📄 Url</label>
-                    <textarea id="trailer_url" name="trailer_url">{{ $registro->trailer_url }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="duracion">⏱️ Duración (minutos)</label>
-                    <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="año">📅 Año</label>
-                    <input type="number" id="año" name="año" value="{{ $registro->año }}">
+                    <label for="precio">💵 Precio</label>
+                    <input type="number" id="precio" name="precio" value="{{ $registro->precio }}" step="0.01" min="0" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="autor">🎬 Director / Autor</label>
-                    <input type="text" id="autor" name="autor" value="{{ $registro->autor }}">
+                    <label for="stock">📦 Stock</label>
+                    <input type="number" id="stock" name="stock" value="{{ $registro->stock }}" min="0" required>
+                    <div class="helper-text">
+                        @if($registro->stock < 10)
+                            <span style="color: #ff6b6b;">⚠️ Stock bajo</span>
+                        @else
+                            <span style="color: #98fb98;">✅ Stock disponible</span>
+                        @endif
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="age_suggest">⏱ Edad sugerida</label>
-                    <input type="text" id="age_suggest" name="age_suggest" value="{{ $registro->age_suggest }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="genero">🎬 Género</label>
-                    <select id="genero" name="genero">
-                        <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ $registro->genero == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ $registro->genero == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ $registro->genero == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ $registro->genero == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ $registro->genero == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ $registro->genero == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ $registro->genero == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ $registro->genero == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ $registro->genero == 'Documental' ? 'selected' : '' }}>Documental</option>
-                    </select>
-                </div>
-
-                @if($registro->ruta_imagen)
+                @if($registro->imagen)
                 <div class="form-group">
                     <label>🖼️ Imagen actual</label>
                     <div class="image-preview">
                         <p>Vista previa de la imagen actual</p>
-                        <img src="{{ asset('storage/' . $registro->ruta_imagen) }}" 
-                             alt="Imagen de {{ $registro->titulo }}">
+                        <img src="{{ asset('storage/' . $registro->imagen) }}" 
+                             alt="Imagen de {{ $registro->nombre }}">
                     </div>
                 </div>
                 @endif
@@ -312,9 +274,9 @@
 
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">
-                        <span>💾 Actualizar Película</span>
+                        <span>💾 Actualizar Producto</span>
                     </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('confiteria.index') }}" class="btn btn-secondary">
                         <span>🔙 Volver al Catálogo</span>
                     </a>
                 </div>

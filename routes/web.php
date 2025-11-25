@@ -6,6 +6,9 @@ use App\Http\Controllers\funcionesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\reservasController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProximamenteController;
+use App\Http\Controllers\ConfiteriaController;
+
 use Illuminate\Support\Facades\Route;
 
 // 👇 Ruta principal del sitio ("/")
@@ -17,7 +20,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     // no necesita devolver vista
 })->middleware('role');
-
 
 // 👇 Ruta para el panel de administración (dashboard)
 // Solo accesible para usuarios autenticados y verificados.
@@ -60,6 +62,19 @@ Route::resource('funciones', funcionesController::class); // CRUD de funciones (
 
 Route::resource('salas', salasController::class);         // CRUD de salas (espacios físicos)
 
+// Ruta personalizada para admin de próximamente (DEBE IR ANTES del resource)
+Route::get('/proximamente/admin', [ProximamenteController::class, 'admin'])
+    ->name('proximamente.admin');
+
+Route::resource('proximamente', ProximamenteController::class); // CRUD de películas próximamente
+
+Route::resource('confiteria', ConfiteriaController::class); // CRUD de confiteria
+
+// Ruta para promover película de próximamente a cartelera
+Route::post('/proximamente/{id}/promover', [ProximamenteController::class, 'promoverACartelera'])
+    ->name('proximamente.promover');
+
+
 // Rutas de reservas (protegidas con autenticación)
 Route::middleware('auth')->group(function () {
     Route::get('/reservas/create/{funcion_id}', [reservasController::class, 'create'])->name('reservas.create');
@@ -71,6 +86,7 @@ Route::middleware('auth')->group(function () {
 // Ruta para obtener funciones por fecha (AJAX)
 Route::get('/movies/{movie}/funciones-por-fecha', [MovieController::class, 'getFuncionesPorFecha'])
     ->name('movies.funciones-por-fecha');
+
 
     // 👇 Rutas API para reservas (usando ReservaApiController)
 Route::middleware('auth')->group(function () {
@@ -110,3 +126,5 @@ Route::post('/webhooks/mercadopago', [App\Http\Controllers\PagoController::class
 
         // Ruta para acceder a pagos
 
+    Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+        ->name('pagos.pending');

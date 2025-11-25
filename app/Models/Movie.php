@@ -15,7 +15,23 @@ class Movie extends Model
 
     // Define los campos que pueden asignarse masivamente (mass assignment).
     // Esto protege contra la asignación de campos no permitidos durante operaciones create() o update().
-    protected $fillable = ['titulo', 'descripcion', 'duracion', 'año', 'autor', 'ruta_imagen','trailer_url','age_suggest','genero'];
+    protected $fillable = ['titulo', 'descripcion', 'duracion', 'año', 'autor', 'ruta_imagen','trailer_url','age_suggest','genero','status'];
+    
+    /**
+     * Scope para filtrar películas en cartelera
+     */
+    public function scopeEnCartelera($query)
+    {
+        return $query->where('status', 'cartelera');
+    }
+    
+    /**
+     * Scope para filtrar películas próximamente
+     */
+    public function scopeProximamente($query)
+    {
+        return $query->where('status', 'proximamente');
+    }
     
     /**
      * Relación: una película puede tener muchas funciones (horarios de proyección).

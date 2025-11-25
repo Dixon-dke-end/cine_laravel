@@ -37,14 +37,25 @@ class Silla extends Model
 
     /**
      * Verifica si la silla está ocupada para una función específica.
-     * Solo considera reservas no canceladas.
+     * Solo considera reservas no canceladas y no expiradas.
      */
     public function estaOcupadaPara($funcionId)
     {
         return $this->reservasSillas()
             ->whereHas('reserva', function ($query) use ($funcionId) {
                 $query->where('funcion_id', $funcionId)
-                      ->where('estado', '!=', 'cancelada');
+                      ->where('estado', '!=', 'cancelada')
+                      ->where(function($subQ) {
+                          // Solo contar reservas confirmadas o pendientes que no expiraron
+                          $subQ->where('estado', 'confirmada')
+                              ->orWhere(function($pendingQ) {
+                                  $pendingQ->where('estado', 'pendiente')
+                                            ->where(function($expireQ) {
+                                                $expireQ->whereNull('expires_at')
+                                                        ->orWhere('expires_at', '>', now());
+                                            });
+                              });
+                      });
             })
             ->exists();
     }

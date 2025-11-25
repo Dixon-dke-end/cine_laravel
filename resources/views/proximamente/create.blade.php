@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Película</title>
-    @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
+    <title>Agregar Película Próximamente</title>
+    <!-- Importación de estilos y scripts de Laravel con Vite -->
+    @vite(['resources/css/admin_create.css', 'resources/js/app.js'])
     <style>
         body {
             display: flex;
@@ -128,11 +129,12 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="{{ route('movies.index') }}" class="navbar-brand">
-                🎬 CineVel (Admin)
+    <nav class="navbar" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); padding: 15px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 1000;">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <a href="{{ route('proximamente.index') }}" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
+                📅 Próximamente (Admin)
             </a>
+            
             <div style="display: flex; align-items: center; gap: 15px;">
                 @auth
                     
@@ -142,7 +144,7 @@
                     
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
-                        <button type="submit" class="btn-logout">
+                        <button type="submit" style="padding: 8px 20px; border-radius: 20px; background: rgba(255, 107, 107, 0.3); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease;">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
@@ -162,11 +164,11 @@
             @auth
                 <!-- Sección Películas -->
                 <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>🎬 Películas</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content active">
+                    <div class="accordion-content">
                         <div class="accordion-links">
                             <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
                             <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
@@ -204,11 +206,11 @@
 
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
                         <span>🎥 Próximamente</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content">
+                    <div class="accordion-content active">
                         <div class="accordion-links">
                             <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
                             <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
@@ -237,85 +239,121 @@
     <div class="container">
         <div class="form-card">
             <div class="header">
-                <h1>✏️ Editar Película</h1>
-                <p class="subtitle">Actualiza la información de tu película</p>
+                <h1>📅 Agregar Película Próximamente</h1>
+                <p class="subtitle">Añade una película que se estrenará próximamente</p>
             </div>
 
-            <form action="{{ route('movies.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('proximamente.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
 
                 <div class="form-group">
-                    <label for="titulo">📝 Título</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ $registro->titulo }}" required>
+                    <label for="titulo" class="required">📝 Título</label>
+                    <input type="text" 
+                           id="titulo" 
+                           name="titulo" 
+                           placeholder="Ej: Inception, Interstellar..." 
+                           value="{{ old('titulo') }}" 
+                           required>
+                    <div class="helper-text">El título de la película es obligatorio</div>
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="url_trailer">📄Url del trailer</label>
+                    <textarea id="descripcion" 
+                              name="trailer_url" 
+                              placeholder="Coloca una url valida https://www.youtube.com/embed">{{ old('trailer_url') }}</textarea>
+                    <div class="helper-text">La url para mostrar al usuario</div>
                 </div>
 
                 <div class="form-group">
                     <label for="descripcion">📄 Descripción</label>
-                    <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
+                    <textarea id="descripcion" 
+                              name="descripcion" 
+                              placeholder="Escribe una breve sinopsis de la película...">{{ old('descripcion') }}</textarea>
+                    <div class="helper-text">Una breve descripción de la trama</div>
                 </div>
-                <div class="form-group">
-                    <label for="url">📄 Url</label>
-                    <textarea id="trailer_url" name="trailer_url">{{ $registro->trailer_url }}</textarea>
-                </div>
+
                 <div class="form-group">
                     <label for="duracion">⏱️ Duración (minutos)</label>
-                    <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">
+                    <input type="number" 
+                           id="duracion" 
+                           name="duracion" 
+                           placeholder="Ej: 148" 
+                           min="1" 
+                           max="240"
+                           value="{{ old('duracion') }}">
+                    <div class="helper-text">Duración total en minutos</div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="año">📅 Año</label>
-                    <input type="number" id="año" name="año" value="{{ $registro->año }}">
+                    <input type="number" 
+                           id="año" 
+                           name="año" 
+                           placeholder="Ej: 2024" 
+                           min="1888" 
+                           max="2100" 
+                           value="{{ old('año') }}">
+                    <div class="helper-text">Año de estreno de la película</div>
                 </div>
 
                 <div class="form-group">
                     <label for="autor">🎬 Director / Autor</label>
-                    <input type="text" id="autor" name="autor" value="{{ $registro->autor }}">
+                    <input type="text" 
+                           id="autor" 
+                           name="autor" 
+                           placeholder="Ej: Christopher Nolan" 
+                           value="{{ old('autor') }}">
+                    <div class="helper-text">Nombre del director o autor principal</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="age_suggest">⏱ Edad sugerida</label>
-                    <input type="text" id="age_suggest" name="age_suggest" value="{{ $registro->age_suggest }}">
-                </div>
+                    <label for="Edad sugerida">Edad Sugerida</label>
+                    <input type="text" 
+                           id="age_suggest" 
+                           name="age_suggest"
+                           value="{{ old('age_suggest') }}">
+                    <div class="helper-text">Coloca la edad a la que va dirigida la pelicula</div>
 
-                <div class="form-group">
-                    <label for="genero">🎬 Género</label>
-                    <select id="genero" name="genero">
+                </div>
+                           
+                           
+                    <label for="genero">Género</label>
+                    <select id="genero" name="genero" class="form-control">
                         <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ $registro->genero == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ $registro->genero == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ $registro->genero == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ $registro->genero == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ $registro->genero == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ $registro->genero == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ $registro->genero == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ $registro->genero == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ $registro->genero == 'Documental' ? 'selected' : '' }}>Documental</option>
+                        <option value="Acción" {{ old('genero') == 'Acción' ? 'selected' : '' }}>Acción</option>
+                        <option value="Aventura" {{ old('genero') == 'Aventura' ? 'selected' : '' }}>Aventura</option>
+                        <option value="Comedia" {{ old('genero') == 'Comedia' ? 'selected' : '' }}>Comedia</option>
+                        <option value="Drama" {{ old('genero') == 'Drama' ? 'selected' : '' }}>Drama</option>
+                        <option value="Terror" {{ old('genero') == 'Terror' ? 'selected' : '' }}>Terror</option>
+                        <option value="Ciencia Ficción" {{ old('genero') == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
+                        <option value="Romance" {{ old('genero') == 'Romance' ? 'selected' : '' }}>Romance</option>
+                        <option value="Animación" {{ old('genero') == 'Animación' ? 'selected' : '' }}>Animación</option>
+                        <option value="Documental" {{ old('genero') == 'Documental' ? 'selected' : '' }}>Documental</option>
                     </select>
-                </div>
-
-                @if($registro->ruta_imagen)
+                    
+                    <div class="helper-text">Coloca el genero de la pelicula</div>
+                
                 <div class="form-group">
-                    <label>🖼️ Imagen actual</label>
-                    <div class="image-preview">
-                        <p>Vista previa de la imagen actual</p>
-                        <img src="{{ asset('storage/' . $registro->ruta_imagen) }}" 
-                             alt="Imagen de {{ $registro->titulo }}">
+                    <label for="ruta_imagen">📷 Imagen de la película</label>
+                    <input type="file" 
+                           id="ruta_imagen" 
+                           name="ruta_imagen" 
+                           accept="image/*">
+                    <div class="helper-text">Selecciona una imagen representativa (JPG, PNG, etc.)</div>
+                    <div class="image-preview-area" id="imagePreview">
+                        <p>✨ Vista previa de la imagen</p>
+                        <img id="previewImg" src="" alt="Preview">
                     </div>
-                </div>
-                @endif
-
-                <div class="form-group">
-                    <label for="imagen">📷 Cambiar imagen</label>
-                    <input type="file" name="imagen" id="imagen" accept="image/*">
                 </div>
 
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">
-                        <span>💾 Actualizar Película</span>
+                        <span>💾 Agregar a Próximamente</span>
                     </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
-                        <span>🔙 Volver al Catálogo</span>
+                    <a href="{{ route('proximamente.index') }}" class="btn btn-secondary">
+                        <span>🔙 Volver a Próximamente</span>
                     </a>
                 </div>
             </form>
@@ -362,26 +400,20 @@
         }
 
         // Preview de imagen al seleccionar archivo
-        document.getElementById('imagen').addEventListener('change', function(e) {
+        document.getElementById('ruta_imagen').addEventListener('change', function(e) {
             const file = e.target.files[0];
+            const previewArea = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const existingPreview = document.querySelector('.image-preview');
-                    if (!existingPreview) {
-                        const preview = document.createElement('div');
-                        preview.className = 'image-preview';
-                        preview.innerHTML = `
-                            <p>Vista previa de la nueva imagen</p>
-                            <img src="${event.target.result}" alt="Nueva imagen">
-                        `;
-                        document.getElementById('imagen').parentElement.appendChild(preview);
-                    } else {
-                        existingPreview.querySelector('img').src = event.target.result;
-                        existingPreview.querySelector('p').textContent = 'Vista previa de la nueva imagen';
-                    }
+                    previewImg.src = event.target.result;
+                    previewArea.classList.add('active');
                 };
                 reader.readAsDataURL(file);
+            } else {
+                previewArea.classList.remove('active');
             }
         });
 
@@ -402,20 +434,50 @@
             });
         });
 
-        // Validación visual
-        const inputs = document.querySelectorAll('input, textarea, select');
+        // Validación visual en tiempo real
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
         inputs.forEach(input => {
-            input.addEventListener('blur', function() {
+            input.addEventListener('input', function() {
                 if (this.value.trim() !== '') {
                     this.style.borderColor = '#98fb98';
                 } else if (this.hasAttribute('required')) {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '' && this.hasAttribute('required')) {
                     this.style.borderColor = '#ff6b6b';
+                    this.style.animation = 'shake 0.3s ease';
                 }
             });
 
             input.addEventListener('focus', function() {
                 this.style.borderColor = '#87ceeb';
+                this.style.animation = 'none';
             });
+        });
+
+        // Animación de shake para campos requeridos vacíos
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Confirmación antes de enviar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const titulo = document.getElementById('titulo').value.trim();
+            if (!titulo) {
+                e.preventDefault();
+                alert('⚠️ Por favor ingresa un título para la película');
+                document.getElementById('titulo').focus();
+                return false;
+            }
         });
     </script>
 </body>

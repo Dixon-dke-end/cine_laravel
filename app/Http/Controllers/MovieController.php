@@ -15,8 +15,8 @@ class MovieController extends Controller
      */
     public function index()
     {
-        // Obtiene todos los registros de la tabla 'movies' usando Eloquent.
-        $var_movies = Movie::all();
+        // Obtiene solo las películas en cartelera (no próximamente)
+        $var_movies = Movie::where('status', 'cartelera')->get();
 
         // Envía los datos obtenidos a la vista 'movies.index'.
         // 'movies' es la variable que la vista usará para mostrar las películas.
@@ -49,7 +49,10 @@ class MovieController extends Controller
             'trailer_url'=>'nullable|string',
             'age_suggest'=>'nullable|string',
             'genero'=>'nullable|string',
-        ]);        
+        ]);
+        
+        // Establecer status por defecto como 'cartelera'
+        $validate['status'] = 'cartelera';        
 
         // 📸 Si se envía una imagen, se guarda en la carpeta 'movies' dentro del disco 'public'.
         // Luego se agrega la ruta del archivo al arreglo validado.
@@ -176,6 +179,15 @@ class MovieController extends Controller
                 'empty' => true
             ]);
         }
+
+        foreach ($funciones as $funcion) {
+            if ($funcion->hora < now()) {
+            return response()->json([
+                'success' => true,
+                'empty' => true
+            ]);
+             }
+        }
         
         // Agrupar por nombre de sala
         $salasPorFecha = $funciones->groupBy('sala.nombre_sala');
@@ -220,4 +232,6 @@ class MovieController extends Controller
         ], 500);
     }
 }
+
+
 }

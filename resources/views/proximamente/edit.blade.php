@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Película</title>
+    <title>Editar Próximamente</title>
     @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
     <style>
         body {
@@ -133,10 +133,11 @@
             <a href="{{ route('movies.index') }}" class="navbar-brand">
                 🎬 CineVel (Admin)
             </a>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            
+            <div class="navbar-user">
                 @auth
                     
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                    <a href="{{ route('dashboard') }}" class="btn-dashboard">
                         📊 Dashboard
                     </a>
                     
@@ -162,11 +163,11 @@
             @auth
                 <!-- Sección Películas -->
                 <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>🎬 Películas</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content active">
+                    <div class="accordion-content">
                         <div class="accordion-links">
                             <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
                             <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
@@ -204,11 +205,11 @@
 
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
                         <span>🎥 Próximamente</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content">
+                    <div class="accordion-content active">
                         <div class="accordion-links">
                             <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
                             <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>

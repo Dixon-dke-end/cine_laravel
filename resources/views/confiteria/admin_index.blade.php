@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Película</title>
-    @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
+    <title>Confitería - Admin</title>
+    @vite(['resources/css/admin_index.css', 'resources/js/app.js'])
     <style>
         body {
             display: flex;
@@ -124,22 +124,114 @@
             top: 0;
             z-index: 1000;
         }
+
+        .product-card {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .product-card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .product-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+
+        .stock-low {
+            color: #ff6b6b;
+        }
+
+        .stock-ok {
+            color: #98fb98;
+        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('movies.index') }}" class="navbar-brand">
-                🎬 CineVel (Admin)
+            <a href="{{ route('confiteria.index') }}" class="navbar-brand">
+                🍿 Confitería (Admin)
             </a>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            
+            <div class="navbar-user">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        @auth
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        @else
+                            I
+                        @endauth
+                    </div>
+                    <span class="user-name">
+                        @auth
+                            {{ Auth::user()->name }}
+                        @else
+                            Invitado
+                        @endauth
+                    </span>
+                </div>
+                
                 @auth
-                    
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                    <a href="{{ route('movies.index') }}" class="btn-dashboard">
+                        🎬 Películas
+                    </a>
+                    <a href="{{ route('dashboard') }}" class="btn-dashboard">
                         📊 Dashboard
                     </a>
-                    
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
                         <button type="submit" class="btn-logout">
@@ -157,16 +249,30 @@
     <div class="main-container">
         <!-- Sidebar Acordeón -->
         <aside class="sidebar">
-            <div class="sidebar-title">Menú Principal</div>
+            <div class="sidebar-title">Menú Confitería</div>
 
             @auth
-                <!-- Sección Películas -->
+                <!-- Sección Confitería -->
                 <div class="accordion-item">
                     <button class="accordion-header active" onclick="toggleAccordion(this)">
-                        <span>🎬 Películas</span>
+                        <span>🍿 Confitería</span>
                         <span class="accordion-icon">▼</span>
                     </button>
                     <div class="accordion-content active">
+                        <div class="accordion-links">
+                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Películas -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🎬 Películas</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
                         <div class="accordion-links">
                             <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
                             <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
@@ -184,20 +290,6 @@
                         <div class="accordion-links">
                             <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
                             <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Confitería -->
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>🍿 Confitería</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
@@ -233,95 +325,66 @@
             @endauth
         </aside>
 
-    <div class="content-wrapper">
-    <div class="container">
-        <div class="form-card">
-            <div class="header">
-                <h1>✏️ Editar Película</h1>
-                <p class="subtitle">Actualiza la información de tu película</p>
-            </div>
-
-            <form action="{{ route('movies.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <div class="form-group">
-                    <label for="titulo">📝 Título</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ $registro->titulo }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="descripcion">📄 Descripción</label>
-                    <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="url">📄 Url</label>
-                    <textarea id="trailer_url" name="trailer_url">{{ $registro->trailer_url }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="duracion">⏱️ Duración (minutos)</label>
-                    <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="año">📅 Año</label>
-                    <input type="number" id="año" name="año" value="{{ $registro->año }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="autor">🎬 Director / Autor</label>
-                    <input type="text" id="autor" name="autor" value="{{ $registro->autor }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="age_suggest">⏱ Edad sugerida</label>
-                    <input type="text" id="age_suggest" name="age_suggest" value="{{ $registro->age_suggest }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="genero">🎬 Género</label>
-                    <select id="genero" name="genero">
-                        <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ $registro->genero == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ $registro->genero == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ $registro->genero == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ $registro->genero == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ $registro->genero == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ $registro->genero == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ $registro->genero == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ $registro->genero == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ $registro->genero == 'Documental' ? 'selected' : '' }}>Documental</option>
-                    </select>
-                </div>
-
-                @if($registro->ruta_imagen)
-                <div class="form-group">
-                    <label>🖼️ Imagen actual</label>
-                    <div class="image-preview">
-                        <p>Vista previa de la imagen actual</p>
-                        <img src="{{ asset('storage/' . $registro->ruta_imagen) }}" 
-                             alt="Imagen de {{ $registro->titulo }}">
-                    </div>
-                </div>
-                @endif
-
-                <div class="form-group">
-                    <label for="imagen">📷 Cambiar imagen</label>
-                    <input type="file" name="imagen" id="imagen" accept="image/*">
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">
-                        <span>💾 Actualizar Película</span>
-                    </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
-                        <span>🔙 Volver al Catálogo</span>
+        <div class="content-wrapper">
+            <div class="container">
+                <div class="header">
+                    <h1>🍿 Catálogo de Confitería</h1>
+                    <a href="{{ route('confiteria.create') }}" class="btn-add">
+                        <span>➕ Agregar Producto</span>
                     </a>
                 </div>
-            </form>
+
+                @if(session('success'))
+                    <div style="background: rgba(152, 251, 152, 0.2); border: 2px solid #98fb98; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; color: #98fb98;">
+                        ✅ {{ session('success') }}
+                    </div>
+                @endif
+                
+                @if($confiteria->isEmpty())
+                    <div class="empty-state">
+                        <h2>🍿 No hay productos registrados</h2>
+                        <p>Comienza agregando tu primer producto de confitería</p>
+                                    <div class="product-description">
+                                        {{ $producto->descripcion ?? 'Sin descripción' }}
+                                    </div>
+                                    
+                                    <div class="product-meta">
+                                        <div class="meta-item">
+                                            <span>💵</span>
+                                            <span>${{ number_format($producto->precio, 2) }}</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <span>📦</span>
+                                            <span class="{{ $producto->stock < 10 ? 'stock-low' : 'stock-ok' }}">
+                                                Stock: {{ $producto->stock }}
+                                                @if($producto->stock < 10)
+                                                    (⚠️ Bajo)
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="product-actions">
+                                    <a href="{{ route('confiteria.edit', $producto->id) }}" class="btn btn-edit">
+                                        <span>✏️ Editar</span>
+                                    </a>
+                                    <form action="{{ route('confiteria.destroy', $producto->id) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('¿Eliminar {{ $producto->nombre }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-delete" style="width: 100%;">
+                                            <span>🗑️ Eliminar</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
-    </div>
-    </div>
     </div>
 
     <script>
@@ -343,7 +406,7 @@
         // Crear partículas de fondo
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const particleCount = 25;
+            const particleCount = 20;
 
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
@@ -361,60 +424,20 @@
             }
         }
 
-        // Preview de imagen al seleccionar archivo
-        document.getElementById('imagen').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const existingPreview = document.querySelector('.image-preview');
-                    if (!existingPreview) {
-                        const preview = document.createElement('div');
-                        preview.className = 'image-preview';
-                        preview.innerHTML = `
-                            <p>Vista previa de la nueva imagen</p>
-                            <img src="${event.target.result}" alt="Nueva imagen">
-                        `;
-                        document.getElementById('imagen').parentElement.appendChild(preview);
-                    } else {
-                        existingPreview.querySelector('img').src = event.target.result;
-                        existingPreview.querySelector('p').textContent = 'Vista previa de la nueva imagen';
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Animación de entrada de campos
         window.addEventListener('load', () => {
             createParticles();
             
-            const formGroups = document.querySelectorAll('.form-group');
-            formGroups.forEach((group, index) => {
-                group.style.opacity = '0';
-                group.style.transform = 'translateX(-30px)';
+            // Animación de entrada
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-50px)';
                 
                 setTimeout(() => {
-                    group.style.transition = 'all 0.5s ease';
-                    group.style.opacity = '1';
-                    group.style.transform = 'translateX(0)';
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
                 }, index * 100);
-            });
-        });
-
-        // Validación visual
-        const inputs = document.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                if (this.value.trim() !== '') {
-                    this.style.borderColor = '#98fb98';
-                } else if (this.hasAttribute('required')) {
-                    this.style.borderColor = '#ff6b6b';
-                }
-            });
-
-            input.addEventListener('focus', function() {
-                this.style.borderColor = '#87ceeb';
             });
         });
     </script>

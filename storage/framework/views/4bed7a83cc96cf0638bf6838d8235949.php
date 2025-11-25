@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Película</title>
+    <title>Agregar Película Próximamente</title>
     <!-- Importación de estilos y scripts de Laravel con Vite -->
-    @vite(['resources/css/admin_create.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_create.css', 'resources/js/app.js']); ?>
     <style>
         body {
             display: flex;
@@ -131,24 +131,24 @@
     <!-- Navbar -->
     <nav class="navbar" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); padding: 15px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 1000;">
         <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
-            <a href="{{ route('movies.index') }}" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
-                🎬 CineVel (Admin)
+            <a href="<?php echo e(route('proximamente.index')); ?>" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
+                📅 Próximamente (Admin)
             </a>
             
             <div style="display: flex; align-items: center; gap: 15px;">
-                @auth
+                <?php if(auth()->guard()->check()): ?>
                     
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                    <a href="<?php echo e(route('dashboard')); ?>" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
                         📊 Dashboard
                     </a>
                     
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" style="padding: 8px 20px; border-radius: 20px; background: rgba(255, 107, 107, 0.3); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease;">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
-                @endauth
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -161,17 +161,17 @@
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
 
-            @auth
+            <?php if(auth()->guard()->check()): ?>
                 <!-- Sección Películas -->
                 <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>🎬 Películas</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content active">
+                    <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
-                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                            <a href="<?php echo e(route('movies.index')); ?>" class="accordion-link">📋 Ver Todas</a>
+                            <a href="<?php echo e(route('movies.create')); ?>" class="accordion-link">➕ Agregar Nueva</a>
                         </div>
                     </div>
                 </div>
@@ -184,8 +184,8 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
-                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                            <a href="<?php echo e(route('funciones.index')); ?>" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="<?php echo e(route('funciones.create')); ?>" class="accordion-link">➕ Agregar Función</a>
                         </div>
                     </div>
                 </div>
@@ -198,28 +198,28 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                            <a href="<?php echo e(route('confiteria.index')); ?>" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="<?php echo e(route('confiteria.create')); ?>" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
                         <span>🎥 Próximamente</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content">
+                    <div class="accordion-content active">
                         <div class="accordion-links">
-                            <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
-                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Usuarios -->
-                @if(Auth::user()->role === 'admin')
+                <?php if(Auth::user()->role === 'admin'): ?>
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>👥 Usuarios</span>
@@ -227,24 +227,24 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
                         </div>
                     </div>
                 </div>
-                @endif
-            @endauth
+                <?php endif; ?>
+            <?php endif; ?>
         </aside>
 
     <div class="content-wrapper">
     <div class="container">
         <div class="form-card">
             <div class="header">
-                <h1>🎬 Crear Nueva Película</h1>
-                <p class="subtitle">Añade una película al catálogo</p>
+                <h1>📅 Agregar Película Próximamente</h1>
+                <p class="subtitle">Añade una película que se estrenará próximamente</p>
             </div>
 
-            <form action="{{ route('movies.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+            <form action="<?php echo e(route('proximamente.store')); ?>" method="POST" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
 
                 <div class="form-group">
                     <label for="titulo" class="required">📝 Título</label>
@@ -252,7 +252,7 @@
                            id="titulo" 
                            name="titulo" 
                            placeholder="Ej: Inception, Interstellar..." 
-                           value="{{ old('titulo') }}" 
+                           value="<?php echo e(old('titulo')); ?>" 
                            required>
                     <div class="helper-text">El título de la película es obligatorio</div>
                 </div>
@@ -262,7 +262,7 @@
                     <label for="url_trailer">📄Url del trailer</label>
                     <textarea id="descripcion" 
                               name="trailer_url" 
-                              placeholder="Coloca una url valida https://www.youtube.com/embed">{{ old('trailer_url') }}</textarea>
+                              placeholder="Coloca una url valida https://www.youtube.com/embed"><?php echo e(old('trailer_url')); ?></textarea>
                     <div class="helper-text">La url para mostrar al usuario</div>
                 </div>
 
@@ -270,7 +270,7 @@
                     <label for="descripcion">📄 Descripción</label>
                     <textarea id="descripcion" 
                               name="descripcion" 
-                              placeholder="Escribe una breve sinopsis de la película...">{{ old('descripcion') }}</textarea>
+                              placeholder="Escribe una breve sinopsis de la película..."><?php echo e(old('descripcion')); ?></textarea>
                     <div class="helper-text">Una breve descripción de la trama</div>
                 </div>
 
@@ -282,7 +282,7 @@
                            placeholder="Ej: 148" 
                            min="1" 
                            max="240"
-                           value="{{ old('duracion') }}">
+                           value="<?php echo e(old('duracion')); ?>">
                     <div class="helper-text">Duración total en minutos</div>
                 </div>
 
@@ -294,7 +294,7 @@
                            placeholder="Ej: 2024" 
                            min="1888" 
                            max="2100" 
-                           value="{{ old('año') }}">
+                           value="<?php echo e(old('año')); ?>">
                     <div class="helper-text">Año de estreno de la película</div>
                 </div>
 
@@ -304,7 +304,7 @@
                            id="autor" 
                            name="autor" 
                            placeholder="Ej: Christopher Nolan" 
-                           value="{{ old('autor') }}">
+                           value="<?php echo e(old('autor')); ?>">
                     <div class="helper-text">Nombre del director o autor principal</div>
                 </div>
 
@@ -313,7 +313,7 @@
                     <input type="text" 
                            id="age_suggest" 
                            name="age_suggest"
-                           value="{{ old('age_suggest') }}">
+                           value="<?php echo e(old('age_suggest')); ?>">
                     <div class="helper-text">Coloca la edad a la que va dirigida la pelicula</div>
 
                 </div>
@@ -322,15 +322,15 @@
                     <label for="genero">Género</label>
                     <select id="genero" name="genero" class="form-control">
                         <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ old('genero') == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ old('genero') == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ old('genero') == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ old('genero') == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ old('genero') == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ old('genero') == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ old('genero') == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ old('genero') == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ old('genero') == 'Documental' ? 'selected' : '' }}>Documental</option>
+                        <option value="Acción" <?php echo e(old('genero') == 'Acción' ? 'selected' : ''); ?>>Acción</option>
+                        <option value="Aventura" <?php echo e(old('genero') == 'Aventura' ? 'selected' : ''); ?>>Aventura</option>
+                        <option value="Comedia" <?php echo e(old('genero') == 'Comedia' ? 'selected' : ''); ?>>Comedia</option>
+                        <option value="Drama" <?php echo e(old('genero') == 'Drama' ? 'selected' : ''); ?>>Drama</option>
+                        <option value="Terror" <?php echo e(old('genero') == 'Terror' ? 'selected' : ''); ?>>Terror</option>
+                        <option value="Ciencia Ficción" <?php echo e(old('genero') == 'Ciencia Ficción' ? 'selected' : ''); ?>>Ciencia Ficción</option>
+                        <option value="Romance" <?php echo e(old('genero') == 'Romance' ? 'selected' : ''); ?>>Romance</option>
+                        <option value="Animación" <?php echo e(old('genero') == 'Animación' ? 'selected' : ''); ?>>Animación</option>
+                        <option value="Documental" <?php echo e(old('genero') == 'Documental' ? 'selected' : ''); ?>>Documental</option>
                     </select>
                     
                     <div class="helper-text">Coloca el genero de la pelicula</div>
@@ -350,10 +350,10 @@
 
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">
-                        <span>💾 Crear Película</span>
+                        <span>💾 Agregar a Próximamente</span>
                     </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
-                        <span>🔙 Volver al Catálogo</span>
+                    <a href="<?php echo e(route('proximamente.index')); ?>" class="btn btn-secondary">
+                        <span>🔙 Volver a Próximamente</span>
                     </a>
                 </div>
             </form>
@@ -481,4 +481,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/proximamente/create.blade.php ENDPATH**/ ?>

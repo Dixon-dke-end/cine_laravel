@@ -15,12 +15,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Obtiene todos los registros de películas desde la base de datos.
-        // Usa Eloquent (ORM de Laravel) para ejecutar el equivalente a "SELECT * FROM movies".
-        $var_movies = Movie::all();
+        // Obtiene las películas en cartelera
+        $movies_cartelera = Movie::where('status', 'cartelera')->get();
+        
+        // Obtiene las películas próximamente
+        $movies_proximamente = Movie::where('status', 'proximamente')->get();
 
-        // Envía las películas obtenidas a la vista 'user.index'.
-        // La vista podrá acceder a ellas mediante la variable 'movies'.
-        return view('user.index', ['movies' => $var_movies]);             
+        // Envía ambas colecciones a la vista 'user.index'.
+        return view('user.index', [
+            'movies' => $movies_cartelera,
+            'proximamente' => $movies_proximamente
+        ]);             
     }
 }

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Película</title>
+    <title>Crear Función</title>
     <!-- Importación de estilos y scripts de Laravel con Vite -->
-    @vite(['resources/css/admin_create.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_create.css', 'resources/js/app.js']); ?>
     <style>
         body {
             display: flex;
@@ -131,24 +131,24 @@
     <!-- Navbar -->
     <nav class="navbar" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); padding: 15px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 1000;">
         <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
-            <a href="{{ route('movies.index') }}" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
+            <a href="<?php echo e(route('movies.index')); ?>" style="display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: #fff; text-decoration: none; transition: all 0.3s ease;">
                 🎬 CineVel (Admin)
             </a>
             
             <div style="display: flex; align-items: center; gap: 15px;">
-                @auth
+                <?php if(auth()->guard()->check()): ?>
                     
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                    <a href="<?php echo e(route('dashboard')); ?>" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
                         📊 Dashboard
                     </a>
                     
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" style="padding: 8px 20px; border-radius: 20px; background: rgba(255, 107, 107, 0.3); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease;">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
-                @endauth
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -161,31 +161,31 @@
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
 
-            @auth
+            <?php if(auth()->guard()->check()): ?>
                 <!-- Sección Películas -->
                 <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>🎬 Películas</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content active">
+                    <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
-                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                            <a href="<?php echo e(route('movies.index')); ?>" class="accordion-link">📋 Ver Todas</a>
+                            <a href="<?php echo e(route('movies.create')); ?>" class="accordion-link">➕ Agregar Nueva</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Funciones -->
                 <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
                         <span>📅 Funciones</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content">
+                    <div class="accordion-content active">
                         <div class="accordion-links">
-                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
-                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                            <a href="<?php echo e(route('funciones.index')); ?>" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="<?php echo e(route('funciones.create')); ?>" class="accordion-link">➕ Agregar Función</a>
                         </div>
                     </div>
                 </div>
@@ -198,8 +198,8 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                            <a href="<?php echo e(route('confiteria.index')); ?>" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="<?php echo e(route('confiteria.create')); ?>" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
@@ -212,14 +212,14 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
-                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Usuarios -->
-                @if(Auth::user()->role === 'admin')
+                <?php if(Auth::user()->role === 'admin'): ?>
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>👥 Usuarios</span>
@@ -227,133 +227,107 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
                         </div>
                     </div>
                 </div>
-                @endif
-            @endauth
+                <?php endif; ?>
+            <?php endif; ?>
         </aside>
 
     <div class="content-wrapper">
     <div class="container">
         <div class="form-card">
             <div class="header">
-                <h1>🎬 Crear Nueva Película</h1>
-                <p class="subtitle">Añade una película al catálogo</p>
+                <h1>📅 Crear Nueva Función</h1>
+                <p class="subtitle">Programa una nueva función de cine</p>
             </div>
 
-            <form action="{{ route('movies.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+            <form action="<?php echo e(route('funciones.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
 
                 <div class="form-group">
-                    <label for="titulo" class="required">📝 Título</label>
-                    <input type="text" 
-                           id="titulo" 
-                           name="titulo" 
-                           placeholder="Ej: Inception, Interstellar..." 
-                           value="{{ old('titulo') }}" 
-                           required>
-                    <div class="helper-text">El título de la película es obligatorio</div>
-                </div>
-
-                
-                <div class="form-group">
-                    <label for="url_trailer">📄Url del trailer</label>
-                    <textarea id="descripcion" 
-                              name="trailer_url" 
-                              placeholder="Coloca una url valida https://www.youtube.com/embed">{{ old('trailer_url') }}</textarea>
-                    <div class="helper-text">La url para mostrar al usuario</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="descripcion">📄 Descripción</label>
-                    <textarea id="descripcion" 
-                              name="descripcion" 
-                              placeholder="Escribe una breve sinopsis de la película...">{{ old('descripcion') }}</textarea>
-                    <div class="helper-text">Una breve descripción de la trama</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="duracion">⏱️ Duración (minutos)</label>
-                    <input type="number" 
-                           id="duracion" 
-                           name="duracion" 
-                           placeholder="Ej: 148" 
-                           min="1" 
-                           max="240"
-                           value="{{ old('duracion') }}">
-                    <div class="helper-text">Duración total en minutos</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="año">📅 Año</label>
-                    <input type="number" 
-                           id="año" 
-                           name="año" 
-                           placeholder="Ej: 2024" 
-                           min="1888" 
-                           max="2100" 
-                           value="{{ old('año') }}">
-                    <div class="helper-text">Año de estreno de la película</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="autor">🎬 Director / Autor</label>
-                    <input type="text" 
-                           id="autor" 
-                           name="autor" 
-                           placeholder="Ej: Christopher Nolan" 
-                           value="{{ old('autor') }}">
-                    <div class="helper-text">Nombre del director o autor principal</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="Edad sugerida">Edad Sugerida</label>
-                    <input type="text" 
-                           id="age_suggest" 
-                           name="age_suggest"
-                           value="{{ old('age_suggest') }}">
-                    <div class="helper-text">Coloca la edad a la que va dirigida la pelicula</div>
-
-                </div>
-                           
-                           
-                    <label for="genero">Género</label>
-                    <select id="genero" name="genero" class="form-control">
-                        <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ old('genero') == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ old('genero') == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ old('genero') == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ old('genero') == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ old('genero') == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ old('genero') == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ old('genero') == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ old('genero') == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ old('genero') == 'Documental' ? 'selected' : '' }}>Documental</option>
+                    <label for="movie_id" class="required">🎬 Película</label>
+                    <select id="movie_id" 
+                            name="movie_id" 
+                            required>
+                        <option value="">-- Seleccione una película --</option>
+                        <?php $__currentLoopData = $peliculas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelicula): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($pelicula->id); ?>" <?php echo e(old('movie_id') == $pelicula->id ? 'selected' : ''); ?>>
+                                <?php echo e($pelicula->titulo); ?> 
+                                <?php if($pelicula->año): ?>
+                                    (<?php echo e($pelicula->año); ?>)
+                                <?php endif; ?>
+                            </option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
-                    
-                    <div class="helper-text">Coloca el genero de la pelicula</div>
-                
+                    <div class="helper-text">Selecciona la película que se proyectará</div>
+                    <?php $__errorArgs = ['movie_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="error-message"><?php echo e($message); ?></div>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
                 <div class="form-group">
-                    <label for="ruta_imagen">📷 Imagen de la película</label>
-                    <input type="file" 
-                           id="ruta_imagen" 
-                           name="ruta_imagen" 
-                           accept="image/*">
-                    <div class="helper-text">Selecciona una imagen representativa (JPG, PNG, etc.)</div>
-                    <div class="image-preview-area" id="imagePreview">
-                        <p>✨ Vista previa de la imagen</p>
-                        <img id="previewImg" src="" alt="Preview">
-                    </div>
+                    <label for="sala_id" class="required">🎭 Sala</label>
+                    <select id="sala_id" 
+                            name="sala_id" 
+                            required>
+                        <option value="">-- Seleccione una sala --</option>
+                        <?php $__currentLoopData = $salas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sala): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($sala->id); ?>" <?php echo e(old('sala_id') == $sala->id ? 'selected' : ''); ?>>
+                                <?php echo e($sala->nombre_sala); ?> 
+                                <?php if($sala->capacidad): ?>
+                                    - Capacidad: <?php echo e($sala->capacidad); ?> personas
+                                <?php endif; ?>
+                            </option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                    <div class="helper-text">Selecciona la sala donde se proyectará la película</div>
+                    <?php $__errorArgs = ['sala_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="error-message"><?php echo e($message); ?></div>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                <div class="form-group">
+                    <label for="hora" class="required">🕐 Fecha y Hora</label>
+                    <input type="datetime-local" 
+                           id="hora" 
+                           name="hora" 
+                           value="<?php echo e(old('hora')); ?>" 
+                           required>
+                    <div class="helper-text">Selecciona la fecha y hora de la función</div>
+                    <?php $__errorArgs = ['hora'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="error-message"><?php echo e($message); ?></div>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">
-                        <span>💾 Crear Película</span>
+                        <span>💾 Crear Función</span>
                     </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
-                        <span>🔙 Volver al Catálogo</span>
+                    <a href="<?php echo e(route('funciones.index')); ?>" class="btn btn-secondary">
+                        <span>🔙 Volver a Funciones</span>
                     </a>
                 </div>
             </form>
@@ -399,24 +373,6 @@
             }
         }
 
-        // Preview de imagen al seleccionar archivo
-        document.getElementById('ruta_imagen').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const previewArea = document.getElementById('imagePreview');
-            const previewImg = document.getElementById('previewImg');
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewImg.src = event.target.result;
-                    previewArea.classList.add('active');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewArea.classList.remove('active');
-            }
-        });
-
         // Animación de entrada de campos
         window.addEventListener('load', () => {
             createParticles();
@@ -435,12 +391,35 @@
         });
 
         // Validación visual en tiempo real
-        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                if (this.value !== '') {
+                    this.style.borderColor = '#98fb98';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
+
+            select.addEventListener('blur', function() {
+                if (this.value === '' && this.hasAttribute('required')) {
+                    this.style.borderColor = '#ff6b6b';
+                    this.style.animation = 'shake 0.3s ease';
+                }
+            });
+
+            select.addEventListener('focus', function() {
+                this.style.borderColor = '#87ceeb';
+                this.style.animation = 'none';
+            });
+        });
+
+        const inputs = document.querySelectorAll('input[type="datetime-local"]');
         inputs.forEach(input => {
-            input.addEventListener('input', function() {
+            input.addEventListener('change', function() {
                 if (this.value.trim() !== '') {
                     this.style.borderColor = '#98fb98';
-                } else if (this.hasAttribute('required')) {
+                } else {
                     this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                 }
             });
@@ -466,19 +445,72 @@
                 25% { transform: translateX(-10px); }
                 75% { transform: translateX(10px); }
             }
+            .error-message {
+                color: #ff6b6b;
+                font-size: 0.875rem;
+                margin-top: 5px;
+                padding: 5px 10px;
+                background: rgba(255, 107, 107, 0.1);
+                border-radius: 5px;
+                border-left: 3px solid #ff6b6b;
+            }
+            select {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                padding-right: 40px;
+            }
+            select:focus {
+                outline: none;
+                border-color: #87ceeb;
+                background-color: rgba(255, 255, 255, 0.15);
+            }
+            select option {
+                background: #2a5298;
+                color: #fff;
+            }
+            input[type="datetime-local"] {
+                color: #000 !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+            }
+            input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+                filter: invert(0);
+                cursor: pointer;
+            }
+            input[type="datetime-local"]::-webkit-datetime-edit-text,
+            input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+            input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+            input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+            input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+            input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+                color: #000 !important;
+            }
         `;
         document.head.appendChild(style);
 
         // Confirmación antes de enviar
         document.querySelector('form').addEventListener('submit', function(e) {
-            const titulo = document.getElementById('titulo').value.trim();
-            if (!titulo) {
+            const movieId = document.getElementById('movie_id').value;
+            const salaId = document.getElementById('sala_id').value;
+            const hora = document.getElementById('hora').value;
+            
+            if (!movieId || !salaId || !hora) {
                 e.preventDefault();
-                alert('⚠️ Por favor ingresa un título para la película');
-                document.getElementById('titulo').focus();
+                alert('⚠️ Por favor completa todos los campos requeridos');
                 return false;
             }
         });
     </script>
 </body>
 </html>
+
+<?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/movies/funciones_create.blade.php ENDPATH**/ ?>

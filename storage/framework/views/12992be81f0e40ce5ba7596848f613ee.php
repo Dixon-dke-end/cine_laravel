@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Película</title>
-    @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
+    <title>Editar Próximamente</title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_edit.css', 'resources/js/app.js']); ?>
     <style>
         body {
             display: flex;
@@ -130,23 +130,24 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('movies.index') }}" class="navbar-brand">
+            <a href="<?php echo e(route('movies.index')); ?>" class="navbar-brand">
                 🎬 CineVel (Admin)
             </a>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                @auth
+            
+            <div class="navbar-user">
+                <?php if(auth()->guard()->check()): ?>
                     
-                    <a href="{{ route('dashboard') }}" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
+                    <a href="<?php echo e(route('dashboard')); ?>" class="btn-dashboard">
                         📊 Dashboard
                     </a>
                     
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-logout">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
-                @endauth
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -159,17 +160,17 @@
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
 
-            @auth
+            <?php if(auth()->guard()->check()): ?>
                 <!-- Sección Películas -->
                 <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>🎬 Películas</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content active">
+                    <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
-                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                            <a href="<?php echo e(route('movies.index')); ?>" class="accordion-link">📋 Ver Todas</a>
+                            <a href="<?php echo e(route('movies.create')); ?>" class="accordion-link">➕ Agregar Nueva</a>
                         </div>
                     </div>
                 </div>
@@ -182,8 +183,8 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
-                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                            <a href="<?php echo e(route('funciones.index')); ?>" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="<?php echo e(route('funciones.create')); ?>" class="accordion-link">➕ Agregar Función</a>
                         </div>
                     </div>
                 </div>
@@ -196,28 +197,28 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                            <a href="<?php echo e(route('confiteria.index')); ?>" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="<?php echo e(route('confiteria.create')); ?>" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
                         <span>🎥 Próximamente</span>
                         <span class="accordion-icon">▼</span>
                     </button>
-                    <div class="accordion-content">
+                    <div class="accordion-content active">
                         <div class="accordion-links">
-                            <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
-                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Usuarios -->
-                @if(Auth::user()->role === 'admin')
+                <?php if(Auth::user()->role === 'admin'): ?>
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>👥 Usuarios</span>
@@ -225,12 +226,12 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
                         </div>
                     </div>
                 </div>
-                @endif
-            @endauth
+                <?php endif; ?>
+            <?php endif; ?>
         </aside>
 
     <div class="content-wrapper">
@@ -241,69 +242,69 @@
                 <p class="subtitle">Actualiza la información de tu película</p>
             </div>
 
-            <form action="{{ route('movies.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            <form action="<?php echo e(route('movies.update', $registro->id)); ?>" method="POST" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
 
                 <div class="form-group">
                     <label for="titulo">📝 Título</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ $registro->titulo }}" required>
+                    <input type="text" id="titulo" name="titulo" value="<?php echo e($registro->titulo); ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label for="descripcion">📄 Descripción</label>
-                    <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
+                    <textarea id="descripcion" name="descripcion"><?php echo e($registro->descripcion); ?></textarea>
                 </div>
                 <div class="form-group">
                     <label for="url">📄 Url</label>
-                    <textarea id="trailer_url" name="trailer_url">{{ $registro->trailer_url }}</textarea>
+                    <textarea id="trailer_url" name="trailer_url"><?php echo e($registro->trailer_url); ?></textarea>
                 </div>
                 <div class="form-group">
                     <label for="duracion">⏱️ Duración (minutos)</label>
-                    <input type="number" id="duracion" name="duracion" value="{{ $registro->duracion }}">
+                    <input type="number" id="duracion" name="duracion" value="<?php echo e($registro->duracion); ?>">
                 </div>
                 
                 <div class="form-group">
                     <label for="año">📅 Año</label>
-                    <input type="number" id="año" name="año" value="{{ $registro->año }}">
+                    <input type="number" id="año" name="año" value="<?php echo e($registro->año); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="autor">🎬 Director / Autor</label>
-                    <input type="text" id="autor" name="autor" value="{{ $registro->autor }}">
+                    <input type="text" id="autor" name="autor" value="<?php echo e($registro->autor); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="age_suggest">⏱ Edad sugerida</label>
-                    <input type="text" id="age_suggest" name="age_suggest" value="{{ $registro->age_suggest }}">
+                    <input type="text" id="age_suggest" name="age_suggest" value="<?php echo e($registro->age_suggest); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="genero">🎬 Género</label>
                     <select id="genero" name="genero">
                         <option value="">Selecciona un género</option>
-                        <option value="Acción" {{ $registro->genero == 'Acción' ? 'selected' : '' }}>Acción</option>
-                        <option value="Aventura" {{ $registro->genero == 'Aventura' ? 'selected' : '' }}>Aventura</option>
-                        <option value="Comedia" {{ $registro->genero == 'Comedia' ? 'selected' : '' }}>Comedia</option>
-                        <option value="Drama" {{ $registro->genero == 'Drama' ? 'selected' : '' }}>Drama</option>
-                        <option value="Terror" {{ $registro->genero == 'Terror' ? 'selected' : '' }}>Terror</option>
-                        <option value="Ciencia Ficción" {{ $registro->genero == 'Ciencia Ficción' ? 'selected' : '' }}>Ciencia Ficción</option>
-                        <option value="Romance" {{ $registro->genero == 'Romance' ? 'selected' : '' }}>Romance</option>
-                        <option value="Animación" {{ $registro->genero == 'Animación' ? 'selected' : '' }}>Animación</option>
-                        <option value="Documental" {{ $registro->genero == 'Documental' ? 'selected' : '' }}>Documental</option>
+                        <option value="Acción" <?php echo e($registro->genero == 'Acción' ? 'selected' : ''); ?>>Acción</option>
+                        <option value="Aventura" <?php echo e($registro->genero == 'Aventura' ? 'selected' : ''); ?>>Aventura</option>
+                        <option value="Comedia" <?php echo e($registro->genero == 'Comedia' ? 'selected' : ''); ?>>Comedia</option>
+                        <option value="Drama" <?php echo e($registro->genero == 'Drama' ? 'selected' : ''); ?>>Drama</option>
+                        <option value="Terror" <?php echo e($registro->genero == 'Terror' ? 'selected' : ''); ?>>Terror</option>
+                        <option value="Ciencia Ficción" <?php echo e($registro->genero == 'Ciencia Ficción' ? 'selected' : ''); ?>>Ciencia Ficción</option>
+                        <option value="Romance" <?php echo e($registro->genero == 'Romance' ? 'selected' : ''); ?>>Romance</option>
+                        <option value="Animación" <?php echo e($registro->genero == 'Animación' ? 'selected' : ''); ?>>Animación</option>
+                        <option value="Documental" <?php echo e($registro->genero == 'Documental' ? 'selected' : ''); ?>>Documental</option>
                     </select>
                 </div>
 
-                @if($registro->ruta_imagen)
+                <?php if($registro->ruta_imagen): ?>
                 <div class="form-group">
                     <label>🖼️ Imagen actual</label>
                     <div class="image-preview">
                         <p>Vista previa de la imagen actual</p>
-                        <img src="{{ asset('storage/' . $registro->ruta_imagen) }}" 
-                             alt="Imagen de {{ $registro->titulo }}">
+                        <img src="<?php echo e(asset('storage/' . $registro->ruta_imagen)); ?>" 
+                             alt="Imagen de <?php echo e($registro->titulo); ?>">
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
                 <div class="form-group">
                     <label for="imagen">📷 Cambiar imagen</label>
@@ -314,7 +315,7 @@
                     <button type="submit" class="btn btn-primary">
                         <span>💾 Actualizar Película</span>
                     </button>
-                    <a href="{{ route('movies.index') }}" class="btn btn-secondary">
+                    <a href="<?php echo e(route('movies.index')); ?>" class="btn btn-secondary">
                         <span>🔙 Volver al Catálogo</span>
                     </a>
                 </div>
@@ -419,4 +420,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/proximamente/edit.blade.php ENDPATH**/ ?>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funciones</title>
-    @vite(['resources/css/admin_index.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_index.css', 'resources/js/app.js']); ?>
     <style>
         body {
             display: flex;
@@ -130,47 +130,49 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <a href="{{ route('movies.index') }}" class="navbar-brand">
+            <a href="<?php echo e(route('movies.index')); ?>" class="navbar-brand">
                 🎬 CineVel (Admin)
             </a>
             
             <div class="navbar-user">
                 <div class="user-info">
                     <div class="user-avatar">
-                        @auth
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        @else
+                        <?php if(auth()->guard()->check()): ?>
+                            <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
+                        <?php else: ?>
                             I
-                        @endauth
+                        <?php endif; ?>
                     </div>
                     <span class="user-name">
-                        @auth
-                            {{ Auth::user()->name }}
-                        @else
+                        <?php if(auth()->guard()->check()): ?>
+                            <?php echo e(Auth::user()->name); ?>
+
+                        <?php else: ?>
                             Invitado
-                        @endauth
+                        <?php endif; ?>
                     </span>
                 </div>
                 
-                @guest
-                    <a href="{{ route('login') }}" class="btn-dashboard">
+                <?php if(auth()->guard()->guest()): ?>
+                    <a href="<?php echo e(route('login')); ?>" class="btn-dashboard">
                         🔐 Iniciar Sesión
                     </a>
-                @endguest
+                <?php endif; ?>
                 
-                @auth
+                <?php if(auth()->guard()->check()): ?>
                     
-                    <a href="{{ route('dashboard') }}" class="btn-dashboard">
+                    <a href="<?php echo e(route('dashboard')); ?>" class="btn-dashboard">
                         📊 Dashboard
                     </a>
                     
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-logout">
                             🚪 Cerrar Sesión
                         </button>
                     </form>
-                @endauth
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -183,7 +185,7 @@
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
 
-            @auth
+            <?php if(auth()->guard()->check()): ?>
                 <!-- Sección Películas -->
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -192,8 +194,8 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
-                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                            <a href="<?php echo e(route('movies.index')); ?>" class="accordion-link">📋 Ver Todas</a>
+                            <a href="<?php echo e(route('movies.create')); ?>" class="accordion-link">➕ Agregar Nueva</a>
                         </div>
                     </div>
                 </div>
@@ -206,8 +208,8 @@
                     </button>
                     <div class="accordion-content active">
                         <div class="accordion-links">
-                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
-                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                            <a href="<?php echo e(route('funciones.index')); ?>" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="<?php echo e(route('funciones.create')); ?>" class="accordion-link">➕ Agregar Función</a>
                         </div>
                     </div>
                 </div>
@@ -220,8 +222,8 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                            <a href="<?php echo e(route('confiteria.index')); ?>" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="<?php echo e(route('confiteria.create')); ?>" class="accordion-link">➕ Agregar Producto</a>
                         </div>
                     </div>
                 </div>
@@ -234,14 +236,14 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
-                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sección Usuarios -->
-                @if(Auth::user()->role === 'admin')
+                <?php if(Auth::user()->role === 'admin'): ?>
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
                         <span>👥 Usuarios</span>
@@ -249,12 +251,12 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
                         </div>
                     </div>
                 </div>
-                @endif
-            @endauth
+                <?php endif; ?>
+            <?php endif; ?>
         </aside>
 
         <div class="content-wrapper">
@@ -262,97 +264,100 @@
                 <div class="header">
                     <h1>📅 Funciones de Cine</h1>
                     <div style="display: flex; gap: 10px;">
-                        <a href="{{ route('funciones.create') }}" class="btn-add">
+                        <a href="<?php echo e(route('funciones.create')); ?>" class="btn-add">
                             <span>➕ Agregar Función</span>
                         </a>
-                        <a href="{{ route('movies.index') }}" class="btn-add">
+                        <a href="<?php echo e(route('movies.index')); ?>" class="btn-add">
                             <span>🔙 Volver a Películas</span>
                         </a>
                     </div>
                 </div>
 
-                @if(session('success'))
+                <?php if(session('success')): ?>
                     <div class="alert alert-success" style="background: rgba(152, 251, 152, 0.2); border: 2px solid #98fb98; color: #98fb98; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
-                        {{ session('success') }}
+                        <?php echo e(session('success')); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
                 
-                @php
+                <?php
                     $peliculasConFunciones = $peliculas->filter(function($pelicula) {
                         return $pelicula->funciones->isNotEmpty();
                     });
-                @endphp
+                ?>
 
-                @if($peliculasConFunciones->isEmpty())
+                <?php if($peliculasConFunciones->isEmpty()): ?>
                     <div class="empty-state">
                         <h2>📽️ No hay funciones registradas</h2>
                         <p>No se han programado funciones aún</p>
-                        <a href="{{ route('funciones.create') }}" class="btn-add">Crear Primera Función</a>
+                        <a href="<?php echo e(route('funciones.create')); ?>" class="btn-add">Crear Primera Función</a>
                     </div>
-                @else
+                <?php else: ?>
                     <div class="peliculas-funciones-container">
-                        @foreach($peliculasConFunciones as $pelicula)
+                        <?php $__currentLoopData = $peliculasConFunciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelicula): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="pelicula-section">
                                 <div class="pelicula-header">
                                     <div class="pelicula-info-header">
-                                        @if($pelicula->ruta_imagen)
-                                            <img src="{{ asset('storage/'.$pelicula->ruta_imagen) }}" 
-                                                 alt="{{ $pelicula->titulo }}" 
+                                        <?php if($pelicula->ruta_imagen): ?>
+                                            <img src="<?php echo e(asset('storage/'.$pelicula->ruta_imagen)); ?>" 
+                                                 alt="<?php echo e($pelicula->titulo); ?>" 
                                                  class="pelicula-thumbnail">
-                                        @else
+                                        <?php else: ?>
                                             <img src="https://via.placeholder.com/100x150?text=Sin+Imagen" 
                                                  alt="Sin imagen" 
                                                  class="pelicula-thumbnail">
-                                        @endif
+                                        <?php endif; ?>
                                         <div class="pelicula-title-info">
-                                            <h2 class="pelicula-title">{{ $pelicula->titulo }}</h2>
-                                            @if($pelicula->año)
-                                                <span class="pelicula-year">📅 {{ $pelicula->año }}</span>
-                                            @endif
-                                            @if($pelicula->duracion)
-                                                <span class="pelicula-duration">⏱️ {{ $pelicula->duracion }} min</span>
-                                            @endif
+                                            <h2 class="pelicula-title"><?php echo e($pelicula->titulo); ?></h2>
+                                            <?php if($pelicula->año): ?>
+                                                <span class="pelicula-year">📅 <?php echo e($pelicula->año); ?></span>
+                                            <?php endif; ?>
+                                            <?php if($pelicula->duracion): ?>
+                                                <span class="pelicula-duration">⏱️ <?php echo e($pelicula->duracion); ?> min</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <div class="funciones-count">
-                                        {{ $pelicula->funciones->count() }} función(es)
+                                        <?php echo e($pelicula->funciones->count()); ?> función(es)
                                     </div>
                                 </div>
                                 
                                 <div class="funciones-grid">
-                                    @foreach($pelicula->funciones->sortBy('hora') as $funcion)
+                                    <?php $__currentLoopData = $pelicula->funciones->sortBy('hora'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $funcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="funcion-card">
                                             <div class="funcion-time">
-                                                🕐 {{ \Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i') }}
+                                                🕐 <?php echo e(\Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i')); ?>
+
                                             </div>
                                             <div class="funcion-sala">
-                                                🎭 {{ $funcion->sala->nombre_sala ?? 'Sala no disponible' }}
-                                                @if($funcion->sala && $funcion->sala->capacidad)
-                                                    <span class="funcion-capacidad">({{ $funcion->sala->capacidad }} personas)</span>
-                                                @endif
+                                                🎭 <?php echo e($funcion->sala->nombre_sala ?? 'Sala no disponible'); ?>
+
+                                                <?php if($funcion->sala && $funcion->sala->capacidad): ?>
+                                                    <span class="funcion-capacidad">(<?php echo e($funcion->sala->capacidad); ?> personas)</span>
+                                                <?php endif; ?>
                                             </div>
                                             <div class="funcion-actions">
-                                                <a href="{{ route('funciones.edit', $funcion->id) }}" class="btn-funcion btn-edit-funcion">
+                                                <a href="<?php echo e(route('funciones.edit', $funcion->id)); ?>" class="btn-funcion btn-edit-funcion">
                                                     ✏️ Editar
                                                 </a>
-                                                <form action="{{ route('funciones.destroy', $funcion->id) }}" 
+                                                <form action="<?php echo e(route('funciones.destroy', $funcion->id)); ?>" 
                                                       method="POST" 
                                                       style="display: inline;"
-                                                      onsubmit="return confirmDelete(event, 'Función del {{ \Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i') }}')">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                      onsubmit="return confirmDelete(event, 'Función del <?php echo e(\Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i')); ?>')">
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit" class="btn-funcion btn-delete-funcion">
                                                         🗑️ Eliminar
                                                     </button>
                                                 </form>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -618,3 +623,4 @@
 </body>
 </html>
 
+<?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/movies/funciones.blade.php ENDPATH**/ ?>

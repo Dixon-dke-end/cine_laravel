@@ -69,8 +69,9 @@ class funcionesController extends Controller
      */
     public function edit(string $id)
     {
-        $peliculas=Funcion::findOrFail($id);
-        return view('movies.funciones_update',compact('peliculas'));
+        $func=Funcion::findOrFail($id);
+        $salas=Sala::all();
+        return view('movies.funciones_update',compact('func','salas'));
 
     }
 
@@ -79,7 +80,20 @@ class funcionesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Find the función to update
+        $funcion = Funcion::findOrFail($id);
+
+        // Validación de los datos
+        $validate = $request->validate([
+            'sala_id' => 'required|exists:salas,id',
+            'hora' => 'required|date|after:now',
+        ]);
+
+        // Update the función
+        $funcion->update($validate);
+
+        // Redirigir con mensaje de éxito
+        return redirect()->route('funciones.index')->with('success', 'Función actualizada correctamente');
     }
 
     /**
