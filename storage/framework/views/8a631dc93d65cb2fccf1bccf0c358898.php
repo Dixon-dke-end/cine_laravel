@@ -256,6 +256,19 @@
                         </div>
                     </div>
                 </div>
+                <!-- Sección Promociones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🏷️ Promociones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('promociones.index')); ?>" class="accordion-link">📋 Ver Promociones</a>
+                            <a href="<?php echo e(route('promociones.create')); ?>" class="accordion-link">➕ Agregar Promoción</a>
+                        </div>
+                    </div>
+                </div>
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">

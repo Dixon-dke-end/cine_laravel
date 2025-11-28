@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Ruta de "health check", usada para verificar que el servidor está en línea
         health: '/up',
     )
+    ->withScheduling(function (Schedule $schedule) {
+    // aquí van tus tareas programadas
+    $schedule->command('app:delete_orders')->everyFiveMinutes();
+    $schedule->command('app:delete_orders')->everyFiveMinutes()->timezone('America/Bogota');
+})
 
     // 👇 Configuración de los middlewares personalizados
     ->withMiddleware(function (Middleware $middleware): void {

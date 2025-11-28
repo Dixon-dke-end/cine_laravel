@@ -16,10 +16,9 @@
             
             <ul class="navbar-menu">
                 <li><a href="#cartelera" class="active">CARTELERA</a></li>
-                <li><a href="#promociones">PROMOCIONES</a></li>
-                <li><a href="{{route('proximamente.index')}}">PRÓXIMAMENTE</a></li>
-                <li><a href="{{route('confiteria.index')}}">CONFITERÍA</a></li>
-            </ul>
+                <li><a href="{{route('promociones.user')}}">PROMOCIONES</a></li>
+                <li><a href="{{route('confiteria.user')}}">CONFITERÍA</a></li>
+            </ul>   
 
             <div class="navbar-user">
                 @guest

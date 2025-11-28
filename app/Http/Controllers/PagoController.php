@@ -326,4 +326,176 @@ class PagoController extends Controller
 
         return response()->json(['status' => 'ok'], 200);
     }
+
+    /**
+     * Mostrar página de checkout/pago para confitería
+     */
+    public function mostrarPagoConfiteria($pedido_id)
+    {
+        $pedido = \App\Models\PedidoConfiteria::with(['productos.producto'])
+            ->findOrFail($pedido_id);
+
+        // Verificar que el usuario sea el dueño
+        if ($pedido->usuario_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para pagar este pedido');
+        }
+
+        // Verificar que esté pendiente
+        if ($pedido->estado !== 'pendiente') {
+            return redirect()->route('confiteria.user')
+                ->with('error', 'Este pedido ya fue procesado.');
+        }
+
+        return view('pagos.checkout-confiteria', compact('pedido'));
+    }
+
+    /**
+     * Crear preferencia de pago en Mercado Pago para confitería
+     */
+    public function crearPreferenciaMercadoPagoConfiteria($pedido_id)
+    {
+        $pedido = \App\Models\PedidoConfiteria::with(['productos.producto'])
+            ->findOrFail($pedido_id);
+
+        if ($pedido->usuario_id !== auth()->id()) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
+        try {
+            if (app()->environment('local')) {
+                $this->disableSSLVerification();
+            }
+
+            $client = new PreferenceClient();
+
+            // Crear items para cada producto
+            $items = [];
+            foreach ($pedido->productos as $item) {
+                $items[] = [
+                    'id' => 'producto_' . $item->producto_id,
+                    'title' => $item->producto->nombre,
+                    'description' => $item->producto->descripcion ?? 'Producto de confitería',
+                    'quantity' => $item->cantidad,
+                    'unit_price' => floatval($item->precio_unitario),
+                    'currency_id' => 'COP'
+                ];
+            }
+
+            $preferenceData = [
+                'items' => $items,
+                'back_urls' => [
+                    'success' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/confiteria/success/' . $pedido->id,
+                    'failure' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/confiteria/failure/' . $pedido->id,
+                    'pending' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/confiteria/success/' . $pedido->id
+                ],
+                'auto_return' => 'approved',
+                'external_reference' => 'pedido_confiteria_' . $pedido->id,
+                'statement_descriptor' => 'CINEVEL CONFITERIA',
+                'notification_url' => url('/webhooks/mercadopago'),
+                'payer' => [
+                    'name' => auth()->user()->name ?? 'Cliente',
+                    'email' => auth()->user()->email ?? 'cliente@cinevel.com'
+                ]
+            ];
+
+            $preference = $client->create($preferenceData);
+
+            \Log::info('✅ Preferencia confitería creada:', [
+                'preference_id' => $preference->id,
+                'pedido_id' => $pedido_id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'preference_id' => $preference->id,
+                'init_point' => $preference->init_point
+            ]);
+
+        } catch (MPApiException $e) {
+            \Log::error('Error API Mercado Pago (Confitería):', [
+                'status' => $e->getApiResponse()->getStatusCode(),
+                'content' => $e->getApiResponse()->getContent(),
+                'pedido_id' => $pedido_id
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el pago con Mercado Pago'
+            ], 500);
+
+        } catch (\Exception $e) {
+            \Log::error('Error general al crear preferencia (Confitería):', [
+                'error' => $e->getMessage(),
+                'pedido_id' => $pedido_id
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el pago'
+            ], 500);
+        }
+    }
+
+    /**
+     * Página de éxito después del pago de confitería
+     */
+    public function pagoExitosoConfiteria(Request $request, $pedido_id)
+    {
+        $pedido = \App\Models\PedidoConfiteria::with(['productos.producto'])
+            ->findOrFail($pedido_id);
+        
+        $payment_id = $request->get('payment_id');
+        $status = $request->get('status');
+        $payment_type = $request->get('payment_type');
+        
+        \Log::info('Pago confitería exitoso recibido:', [
+            'pedido_id' => $pedido_id,
+            'payment_id' => $payment_id,
+            'status' => $status
+        ]);
+
+        if ($status === 'approved' && $pedido->estado !== 'pagado') {
+            try {
+                $pedido->update([
+                    'estado' => 'pagado',
+                    'metodo_pago' => 'mercado_pago',
+                    'pago_id' => $payment_id,
+                    'fecha_pago' => now()
+                ]);
+
+                \Log::info("✅ Pedido confitería {$pedido_id} confirmado exitosamente");
+
+                return view('pagos.success-confiteria', compact('pedido'));
+
+            } catch (\Exception $e) {
+                \Log::error('Error al confirmar pago confitería:', [
+                    'error' => $e->getMessage(),
+                    'pedido_id' => $pedido_id
+                ]);
+                
+                return redirect()->route('confiteria.user')
+                    ->with('error', 'Hubo un problema al confirmar tu pago. Contacta a soporte.');
+            }
+        }
+
+        if ($status === 'pending') {
+            return view('pagos.pending-confiteria', compact('pedido'));
+        }
+
+        return redirect()->route('confiteria.user')
+            ->with('info', 'Este pedido ya fue procesado anteriormente.');
+    }
+
+    /**
+     * Página de pago fallido o cancelado para confitería
+     */
+    public function pagoFallidoConfiteria($pedido_id)
+    {
+        $pedido = \App\Models\PedidoConfiteria::with(['productos.producto'])
+            ->findOrFail($pedido_id);
+        
+        \Log::warning('Pago confitería fallido o cancelado:', ['pedido_id' => $pedido_id]);
+        
+        return view('pagos.failure-confiteria', compact('pedido'));
+    }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\reservasController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProximamenteController;
 use App\Http\Controllers\ConfiteriaController;
+use App\Http\Controllers\PagoController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -68,12 +69,17 @@ Route::get('/proximamente/admin', [ProximamenteController::class, 'admin'])
 
 Route::resource('proximamente', ProximamenteController::class); // CRUD de películas próximamente
 
-Route::resource('confiteria', ConfiteriaController::class); // CRUD de confiteria
+Route::resource('confiteria', ConfiteriaController::class); // CRUD de confiteria (Admin)
+Route::resource('promociones', App\Http\Controllers\PromocionController::class); // CRUD de promociones
+
+// Ruta pública de confitería para usuarios
+Route::get('/user/confiteria', [ConfiteriaController::class, 'userIndex'])->name('confiteria.user')->middleware('auth');
 
 // Ruta para promover película de próximamente a cartelera
 Route::post('/proximamente/{id}/promover', [ProximamenteController::class, 'promoverACartelera'])
-    ->name('proximamente.promover');
-
+        ->name('proximamente.promover');
+    
+Route::get('/user/promociones', [App\Http\Controllers\PromocionController::class, 'user'])->name('promociones.user');
 
 // Rutas de reservas (protegidas con autenticación)
 Route::middleware('auth')->group(function () {
@@ -126,5 +132,25 @@ Route::post('/webhooks/mercadopago', [App\Http\Controllers\PagoController::class
 
         // Ruta para acceder a pagos
 
-    Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+        Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
         ->name('pagos.pending');
+
+
+Route::middleware('auth')->group(function () {  
+    // Catálogo y Carrito
+    Route::post('/carrito/agregar', [ConfiteriaController::class, 'agregarAlCarrito'])->name('carrito.agregar');
+    Route::put('/carrito/actualizar/{id}', [ConfiteriaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
+    Route::delete('/carrito/eliminar/{id}', [ConfiteriaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
+    Route::delete('/carrito/limpiar', [ConfiteriaController::class, 'limpiarCarrito'])->name('carrito.limpiar');
+    
+    // Pedidos
+    Route::post('/pedidos/confiteria', [ConfiteriaController::class, 'crearPedido'])->name('pedidos.confiteria.crear');
+    Route::get('/pedidos/confiteria', [ConfiteriaController::class, 'misPedidos'])->name('pedidos.confiteria.index');
+    Route::get('/pedidos/confiteria/{id}', [ConfiteriaController::class, 'verPedido'])->name('pedidos.confiteria.ver');
+    
+    // Pagos
+    Route::get('/pagos/checkout/confiteria/{pedido_id}', [PagoController::class, 'mostrarPagoConfiteria'])->name('pagos.checkout.confiteria');
+    Route::post('/pagos/confiteria/crear-preferencia/{pedido_id}', [PagoController::class, 'crearPreferenciaMercadoPagoConfiteria'])->name('pagos.confiteria.preferencia');
+    Route::get('/pagos/confiteria/success/{pedido_id}', [PagoController::class, 'pagoExitosoConfiteria'])->name('pagos.confiteria.success');
+    Route::get('/pagos/confiteria/failure/{pedido_id}', [PagoController::class, 'pagoFallidoConfiteria'])->name('pagos.confiteria.failure');
+});

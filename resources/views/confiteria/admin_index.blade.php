@@ -294,6 +294,20 @@
                     </div>
                 </div>
 
+                <!-- Sección Promociones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🏷️ Promociones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('promociones.index') }}" class="accordion-link">📋 Ver Promociones</a>
+                            <a href="{{ route('promociones.create') }}" class="accordion-link">➕ Agregar Promoción</a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -344,44 +358,62 @@
                     <div class="empty-state">
                         <h2>🍿 No hay productos registrados</h2>
                         <p>Comienza agregando tu primer producto de confitería</p>
-                                    <div class="product-description">
-                                        {{ $producto->descripcion ?? 'Sin descripción' }}
-                                    </div>
-                                    
-                                    <div class="product-meta">
-                                        <div class="meta-item">
-                                            <span>💵</span>
-                                            <span>${{ number_format($producto->precio, 2) }}</span>
-                                        </div>
-                                        <div class="meta-item">
-                                            <span>📦</span>
-                                            <span class="{{ $producto->stock < 10 ? 'stock-low' : 'stock-ok' }}">
-                                                Stock: {{ $producto->stock }}
-                                                @if($producto->stock < 10)
-                                                    (⚠️ Bajo)
-                                                @endif
-                                            </span>
-                                        </div>
-                                    </div>
+                        <a href="{{ route('confiteria.create') }}" class="btn-add">
+                            ➕ Agregar Primer Producto
+                        </a>
+                    </div>
+                @else
+                    @foreach($confiteria as $producto)
+                        <div class="product-card">
+                            @if($producto->imagen)
+                                <img src="{{ asset('storage/' . $producto->imagen) }}" 
+                                     alt="{{ $producto->nombre }}" 
+                                     class="product-image">
+                            @else
+                                <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: rgba(0, 212, 255, 0.1); font-size: 3rem;">
+                                    🍿
                                 </div>
+                            @endif
 
-                                <div class="product-actions">
-                                    <a href="{{ route('confiteria.edit', $producto->id) }}" class="btn btn-edit">
-                                        <span>✏️ Editar</span>
-                                    </a>
-                                    <form action="{{ route('confiteria.destroy', $producto->id) }}" 
-                                          method="POST" 
-                                          onsubmit="return confirm('¿Eliminar {{ $producto->nombre }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-delete" style="width: 100%;">
-                                            <span>🗑️ Eliminar</span>
-                                        </button>
-                                    </form>
+                            <div class="product-info">
+                                <div class="product-name">{{ $producto->nombre }}</div>
+                                <div class="product-description">
+                                    {{ $producto->descripcion ?? 'Sin descripción' }}
+                                </div>
+                                
+                                <div class="product-meta">
+                                    <div class="meta-item">
+                                        <span>💵</span>
+                                        <span>${{ number_format($producto->precio, 2) }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span>📦</span>
+                                        <span class="{{ $producto->stock < 10 ? 'stock-low' : 'stock-ok' }}">
+                                            Stock: {{ $producto->stock }}
+                                            @if($producto->stock < 10)
+                                                (⚠️ Bajo)
+                                            @endif
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
+
+                            <div class="product-actions">
+                                <a href="{{ route('confiteria.edit', $producto->id) }}" class="btn btn-edit">
+                                    <span>✏️ Editar</span>
+                                </a>
+                                <form action="{{ route('confiteria.destroy', $producto->id) }}" 
+                                      method="POST" 
+                                      onsubmit="return confirm('¿Eliminar {{ $producto->nombre }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-delete" style="width: 100%;">
+                                        <span>🗑️ Eliminar</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
                 @endif
             </div>
         </div>

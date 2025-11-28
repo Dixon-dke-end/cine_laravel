@@ -296,6 +296,20 @@
                     </div>
                 </div>
 
+                <!-- Sección Promociones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🏷️ Promociones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('promociones.index')); ?>" class="accordion-link">📋 Ver Promociones</a>
+                            <a href="<?php echo e(route('promociones.create')); ?>" class="accordion-link">➕ Agregar Promoción</a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -347,46 +361,64 @@
                     <div class="empty-state">
                         <h2>🍿 No hay productos registrados</h2>
                         <p>Comienza agregando tu primer producto de confitería</p>
-                                    <div class="product-description">
-                                        <?php echo e($producto->descripcion ?? 'Sin descripción'); ?>
-
-                                    </div>
-                                    
-                                    <div class="product-meta">
-                                        <div class="meta-item">
-                                            <span>💵</span>
-                                            <span>$<?php echo e(number_format($producto->precio, 2)); ?></span>
-                                        </div>
-                                        <div class="meta-item">
-                                            <span>📦</span>
-                                            <span class="<?php echo e($producto->stock < 10 ? 'stock-low' : 'stock-ok'); ?>">
-                                                Stock: <?php echo e($producto->stock); ?>
-
-                                                <?php if($producto->stock < 10): ?>
-                                                    (⚠️ Bajo)
-                                                <?php endif; ?>
-                                            </span>
-                                        </div>
-                                    </div>
+                        <a href="<?php echo e(route('confiteria.create')); ?>" class="btn-add">
+                            ➕ Agregar Primer Producto
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php $__currentLoopData = $confiteria; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $producto): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="product-card">
+                            <?php if($producto->imagen): ?>
+                                <img src="<?php echo e(asset('storage/' . $producto->imagen)); ?>" 
+                                     alt="<?php echo e($producto->nombre); ?>" 
+                                     class="product-image">
+                            <?php else: ?>
+                                <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: rgba(0, 212, 255, 0.1); font-size: 3rem;">
+                                    🍿
                                 </div>
+                            <?php endif; ?>
 
-                                <div class="product-actions">
-                                    <a href="<?php echo e(route('confiteria.edit', $producto->id)); ?>" class="btn btn-edit">
-                                        <span>✏️ Editar</span>
-                                    </a>
-                                    <form action="<?php echo e(route('confiteria.destroy', $producto->id)); ?>" 
-                                          method="POST" 
-                                          onsubmit="return confirm('¿Eliminar <?php echo e($producto->nombre); ?>?')">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button type="submit" class="btn btn-delete" style="width: 100%;">
-                                            <span>🗑️ Eliminar</span>
-                                        </button>
-                                    </form>
+                            <div class="product-info">
+                                <div class="product-name"><?php echo e($producto->nombre); ?></div>
+                                <div class="product-description">
+                                    <?php echo e($producto->descripcion ?? 'Sin descripción'); ?>
+
+                                </div>
+                                
+                                <div class="product-meta">
+                                    <div class="meta-item">
+                                        <span>💵</span>
+                                        <span>$<?php echo e(number_format($producto->precio, 2)); ?></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span>📦</span>
+                                        <span class="<?php echo e($producto->stock < 10 ? 'stock-low' : 'stock-ok'); ?>">
+                                            Stock: <?php echo e($producto->stock); ?>
+
+                                            <?php if($producto->stock < 10): ?>
+                                                (⚠️ Bajo)
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </div>
+
+                            <div class="product-actions">
+                                <a href="<?php echo e(route('confiteria.edit', $producto->id)); ?>" class="btn btn-edit">
+                                    <span>✏️ Editar</span>
+                                </a>
+                                <form action="<?php echo e(route('confiteria.destroy', $producto->id)); ?>" 
+                                      method="POST" 
+                                      onsubmit="return confirm('¿Eliminar <?php echo e($producto->nombre); ?>?')">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
+                                    <button type="submit" class="btn btn-delete" style="width: 100%;">
+                                        <span>🗑️ Eliminar</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <?php endif; ?>
             </div>
         </div>
