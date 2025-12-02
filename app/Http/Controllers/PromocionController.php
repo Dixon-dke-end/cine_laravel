@@ -122,4 +122,10 @@ class PromocionController extends Controller
         $promociones = \App\Models\Promocion::all();
         return view('user.promociones', compact('promociones'));
     }
+
+    public function detalles($id)
+    {
+        $promocion = \App\Models\Promocion::findOrFail($id);
+        return view('user.promocion_detalles', compact('promocion'));
+    }
 }

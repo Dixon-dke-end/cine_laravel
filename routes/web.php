@@ -1,156 +1,157 @@
 <?php
-// Importa los controladores necesarios para manejar las diferentes rutas
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\funcionesController;
 use App\Http\Controllers\salasController;
 use App\Http\Controllers\reservasController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ProximamenteController;
 use App\Http\Controllers\ConfiteriaController;
 use App\Http\Controllers\PagoController;
 
 use Illuminate\Support\Facades\Route;
 
-// 👇 Ruta principal del sitio ("/")
-// Cuando un usuario entra a la raíz, es redirigido automáticamente
-// a la ruta llamada 'user.index', que probablemente muestra el panel del usuario.
-// Esta ruta está protegida por dos middlewares:
-//  - 'auth': exige que el usuario esté autenticado.
-//  - 'role': verifica el rol (por ejemplo, si es admin o usuario normal).
 Route::get('/', function () {
     // no necesita devolver vista
 })->middleware('role');
 
-// 👇 Ruta para el panel de administración (dashboard)
-// Solo accesible para usuarios autenticados y verificados.
-// 'verified' se usa normalmente cuando el sistema exige verificación de correo.
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware([ 'verified'])->name('dashboard');
+})->middleware(['verified'])->name('dashboard');
 
-// 👇 Ruta para el panel principal de los usuarios normales.
-// Llama al método 'index' del UserController.
-// Está protegida por el middleware 'auth' (debe estar logueado).
 Route::get('/user/index', [UserController::class, 'index'])
     ->name('user.index');
 
-// 👇 Grupo de rutas relacionadas con el perfil del usuario autenticado.
-// Este grupo aplica el middleware 'auth' a todas sus rutas internas.
+Route::get('/user/perfil', [UserProfileController::class, 'index'])
+    ->middleware('auth')
+    ->name('user.perfil');
+
 Route::middleware('auth')->group(function () {
-
-    // Muestra la vista para editar el perfil del usuario actual.
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-
-    // Procesa los cambios del perfil enviados por el formulario (método PATCH).
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Elimina el perfil (usuario) autenticado.
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// 👇 Carga las rutas de autenticación generadas por Laravel Breeze o Jetstream
-// (login, registro, recuperación de contraseña, etc.)
 require __DIR__.'/auth.php';
 
-// 👇 Define rutas RESTful automáticas para los recursos principales del sistema.
-// Laravel genera automáticamente todas las rutas CRUD (index, create, store, show, edit, update, destroy)
-// para cada uno de los siguientes controladores:
+Route::resource('movies', MovieController::class);
+Route::resource('funciones', funcionesController::class);
+Route::resource('salas', salasController::class);
 
-Route::resource('movies', MovieController::class);        // CRUD de películas
-
-Route::resource('funciones', funcionesController::class); // CRUD de funciones (horarios o sesiones)
-
-Route::resource('salas', salasController::class);         // CRUD de salas (espacios físicos)
-
-// Ruta personalizada para admin de próximamente (DEBE IR ANTES del resource)
 Route::get('/proximamente/admin', [ProximamenteController::class, 'admin'])
     ->name('proximamente.admin');
 
-Route::resource('proximamente', ProximamenteController::class); // CRUD de películas próximamente
+Route::resource('proximamente', ProximamenteController::class);
+Route::resource('confiteria', ConfiteriaController::class);
+Route::resource('promociones', App\Http\Controllers\PromocionController::class);
 
-Route::resource('confiteria', ConfiteriaController::class); // CRUD de confiteria (Admin)
-Route::resource('promociones', App\Http\Controllers\PromocionController::class); // CRUD de promociones
+// Ruta pública de confitería para usuarios (catálogo general)
+Route::get('/user/confiteria', [ConfiteriaController::class, 'userIndex'])
+    ->name('confiteria.user')
+    ->middleware('auth');
 
-// Ruta pública de confitería para usuarios
-Route::get('/user/confiteria', [ConfiteriaController::class, 'userIndex'])->name('confiteria.user')->middleware('auth');
+// 🎯 NUEVA RUTA: Confitería vinculada a reserva (después de seleccionar asientos)
+Route::get('/user/confiteria/reserva/{reserva_id}', [ConfiteriaController::class, 'mostrarConfiteriaConReserva'])
+    ->name('confiteria.reserva')
+    ->middleware('auth');
 
-// Ruta para promover película de próximamente a cartelera
 Route::post('/proximamente/{id}/promover', [ProximamenteController::class, 'promoverACartelera'])
-        ->name('proximamente.promover');
+    ->name('proximamente.promover');
     
-Route::get('/user/promociones', [App\Http\Controllers\PromocionController::class, 'user'])->name('promociones.user');
+Route::get('/user/promociones', [App\Http\Controllers\PromocionController::class, 'user'])
+    ->name('promociones.user');
+    
+Route::get('/promociones/{id}/detalles', [App\Http\Controllers\PromocionController::class, 'detalles'])
+    ->name('promociones.detalles');
 
-// Rutas de reservas (protegidas con autenticación)
+// Rutas de reservas
 Route::middleware('auth')->group(function () {
     Route::get('/reservas/create/{funcion_id}', [reservasController::class, 'create'])->name('reservas.create');
     Route::post('/reservas', [reservasController::class, 'store'])->name('reservas.store');
     Route::get('/reservas', [reservasController::class, 'index'])->name('reservas.index');
     Route::get('/reservas/{id}', [reservasController::class, 'show'])->name('reservas.show');
+    
+    // 🔄 RUTA ANTIGUA (mantener por compatibilidad, pero redirigir a la nueva)
+    Route::get('/user/reservaComfi/{id}', function($id) {
+        return redirect()->route('confiteria.reserva', $id);
+    })->name('reservas.showComfi');
 });
 
-// Ruta para obtener funciones por fecha (AJAX)
 Route::get('/movies/{movie}/funciones-por-fecha', [MovieController::class, 'getFuncionesPorFecha'])
     ->name('movies.funciones-por-fecha');
 
-
-    // 👇 Rutas API para reservas (usando ReservaApiController)
+// Rutas API para reservas
 Route::middleware('auth')->group(function () {
-    // API para crear reservas desde JavaScript
     Route::post('/api/reservas', [App\Http\Controllers\ReservaApiController::class, 'store'])
         ->name('api.reservas.store');
     
-    // API para obtener sillas de una función
     Route::get('/api/funciones/{id}/sillas', [App\Http\Controllers\ReservaApiController::class, 'getSillas'])
         ->name('api.funciones.sillas');
 });
 
 // Rutas de pago
 Route::middleware('auth')->group(function () {
-    // Página de checkout
-    Route::get('/pagos/checkout/{reserva_id}', [App\Http\Controllers\PagoController::class, 'mostrarPago'])
+    // 🎯 RUTAS DE PAGO UNIFICADO (Reserva + Confitería)
+    Route::get('/pagos/checkout/unificado', [PagoController::class, 'mostrarPagoUnificado'])
+        ->name('pagos.checkout.unificado');
+    
+    Route::post('/pagos/unificado/crear-preferencia', [PagoController::class, 'crearPreferenciaMercadoPagoUnificado'])
+        ->name('pagos.unificado.preferencia');
+    
+    Route::get('/pagos/unificado/success', [PagoController::class, 'pagoExitosoUnificado'])
+        ->name('pagos.unificado.success');
+    
+    Route::get('/pagos/unificado/failure', [PagoController::class, 'pagoFallidoUnificado'])
+        ->name('pagos.unificado.failure');
+    
+    // Rutas antiguas de pago (mantener por compatibilidad)
+    Route::get('/pagos/checkout/{reserva_id}', [PagoController::class, 'mostrarPago'])
         ->name('pagos.checkout');
     
-    // Crear preferencia de Mercado Pago (AJAX)
-    Route::post('/pagos/mercadopago/preference/{reserva_id}', [App\Http\Controllers\PagoController::class, 'crearPreferenciaMercadoPago'])
+    Route::post('/pagos/mercadopago/preference/{reserva_id}', [PagoController::class, 'crearPreferenciaMercadoPago'])
         ->name('pagos.mercadopago.preference');
     
-    // URLs de retorno de Mercado Pago
-    Route::get('/pagos/success/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+    Route::get('/pagos/success/{reserva_id}', [PagoController::class, 'pagoExitoso'])
         ->name('pagos.success');
     
-    Route::get('/pagos/failure/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoFallido'])
+    Route::get('/pagos/failure/{reserva_id}', [PagoController::class, 'pagoFallido'])
         ->name('pagos.failure');
     
-    Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
+    Route::get('/pagos/pending/{reserva_id}', [PagoController::class, 'pagoExitoso'])
         ->name('pagos.pending');
 });
 
-// Webhook de Mercado Pago (sin autenticación)
-Route::post('/webhooks/mercadopago', [App\Http\Controllers\PagoController::class, 'webhookMercadoPago'])
+Route::post('/webhooks/mercadopago', [PagoController::class, 'webhookMercadoPago'])
     ->name('webhooks.mercadopago');
 
-        // Ruta para acceder a pagos
-
-        Route::get('/pagos/pending/{reserva_id}', [App\Http\Controllers\PagoController::class, 'pagoExitoso'])
-        ->name('pagos.pending');
-
-
+// Rutas de carrito y confitería
 Route::middleware('auth')->group(function () {  
-    // Catálogo y Carrito
-    Route::post('/carrito/agregar', [ConfiteriaController::class, 'agregarAlCarrito'])->name('carrito.agregar');
-    Route::put('/carrito/actualizar/{id}', [ConfiteriaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
-    Route::delete('/carrito/eliminar/{id}', [ConfiteriaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
-    Route::delete('/carrito/limpiar', [ConfiteriaController::class, 'limpiarCarrito'])->name('carrito.limpiar');
+    Route::post('/carrito/agregar', [ConfiteriaController::class, 'agregarAlCarrito'])
+        ->name('carrito.agregar');
+    Route::put('/carrito/actualizar/{id}', [ConfiteriaController::class, 'actualizarCarrito'])
+        ->name('carrito.actualizar');
+    Route::delete('/carrito/eliminar/{id}', [ConfiteriaController::class, 'eliminarDelCarrito'])
+        ->name('carrito.eliminar');
+    Route::delete('/carrito/limpiar', [ConfiteriaController::class, 'limpiarCarrito'])
+        ->name('carrito.limpiar');
     
-    // Pedidos
-    Route::post('/pedidos/confiteria', [ConfiteriaController::class, 'crearPedido'])->name('pedidos.confiteria.crear');
-    Route::get('/pedidos/confiteria', [ConfiteriaController::class, 'misPedidos'])->name('pedidos.confiteria.index');
-    Route::get('/pedidos/confiteria/{id}', [ConfiteriaController::class, 'verPedido'])->name('pedidos.confiteria.ver');
+    // Pedidos de confitería
+    Route::post('/pedidos/confiteria', [ConfiteriaController::class, 'crearPedido'])
+        ->name('pedidos.confiteria.crear');
+    Route::get('/pedidos/confiteria', [ConfiteriaController::class, 'misPedidos'])
+        ->name('pedidos.confiteria.index');
+    Route::get('/pedidos/confiteria/{id}', [ConfiteriaController::class, 'verPedido'])
+        ->name('pedidos.confiteria.ver');
     
-    // Pagos
-    Route::get('/pagos/checkout/confiteria/{pedido_id}', [PagoController::class, 'mostrarPagoConfiteria'])->name('pagos.checkout.confiteria');
-    Route::post('/pagos/confiteria/crear-preferencia/{pedido_id}', [PagoController::class, 'crearPreferenciaMercadoPagoConfiteria'])->name('pagos.confiteria.preferencia');
-    Route::get('/pagos/confiteria/success/{pedido_id}', [PagoController::class, 'pagoExitosoConfiteria'])->name('pagos.confiteria.success');
-    Route::get('/pagos/confiteria/failure/{pedido_id}', [PagoController::class, 'pagoFallidoConfiteria'])->name('pagos.confiteria.failure');
+    // Pagos de confitería
+    Route::get('/pagos/checkout/confiteria/{pedido_id}', [PagoController::class, 'mostrarPagoConfiteria'])
+        ->name('pagos.checkout.confiteria');
+    Route::post('/pagos/confiteria/crear-preferencia/{pedido_id}', [PagoController::class, 'crearPreferenciaMercadoPagoConfiteria'])
+        ->name('pagos.confiteria.preferencia');
+    Route::get('/pagos/confiteria/success/{pedido_id}', [PagoController::class, 'pagoExitosoConfiteria'])
+        ->name('pagos.confiteria.success');
+    Route::get('/pagos/confiteria/failure/{pedido_id}', [PagoController::class, 'pagoFallidoConfiteria'])
+        ->name('pagos.confiteria.failure');
 });

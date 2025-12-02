@@ -606,7 +606,7 @@
                     </div>
                     <span>{{ Auth::user()->name ?? 'Invitado' }}</span>
                 </div>
-                <a href="{{ route('proximamente.create') }}" class="btn-add-navbar">
+                <a href="{{ route('movies.create') }}" class="btn-add-navbar">
                     ➕ Agregar Película
                 </a>
             </div>
@@ -618,57 +618,98 @@
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
-            
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <span>📽️ Películas</span>
-                    <span class="accordion-icon">▼</span>
-                </button>
-                <div class="accordion-content">
-                    <div class="accordion-links">
-                        <a href="{{ route('movies.index') }}" class="accordion-link">Ver todas</a>
-                        <a href="{{ route('proximamente.index') }}" class="accordion-link">Próximamente</a>
-                        <a href="{{ route('movies.index') }}" class="accordion-link">En cartelera</a>
-                    </div>
-                </div>
-            </div>
 
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <span>🎟️ Funciones</span>
-                    <span class="accordion-icon">▼</span>
-                </button>
-                <div class="accordion-content">
-                    <div class="accordion-links">
-                        <a href="#" class="accordion-link">Listar funciones</a>
-                        <a href="#" class="accordion-link">Crear función</a>
+            @auth
+                            <!-- Sección Próximamente -->
+                <div class="accordion-item">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                        <span>🎥 Próximamente</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content active" >
+                        <div class="accordion-links">
+                            <a href="{{ route('proximamente.admin') }}" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <span>⚙️ Configuración</span>
-                    <span class="accordion-icon">▼</span>
-                </button>
-                <div class="accordion-content">
-                    <div class="accordion-links">
-                        <a href="#" class="accordion-link">Perfil</a>
-                        <a href="{{ route('logout') }}" class="accordion-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            Cerrar sesión
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
+                <!-- Sección Películas -->
+                <div class="accordion-item">
+                    <button class="accordion-header " onclick="toggleAccordion(this)">
+                        <span>🎬 Películas</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content ">
+                        <div class="accordion-links">
+                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
+                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Sección Funciones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>📅 Funciones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                        </div>
+                    </div>
+                </div>
+               <!-- Sección confiteria -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Confiteria</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Confiteria</a>
+                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Confiteria</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sección Promociones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🏷️ Promociones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('promociones.index') }}" class="accordion-link">📋 Ver Promociones</a>
+                            <a href="{{ route('promociones.create') }}" class="accordion-link">➕ Agregar Promoción</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Usuarios -->
+                @if(Auth::user()->role === 'admin')
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>👥 Usuarios</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="{{ route('user.index') }}" class="accordion-link">👨‍💼 Gestionar</a>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            @endauth
         </aside>
 
         <!-- CONTENT WRAPPER -->
         <div class="content-wrapper">
             <div class="content">
-                <h1>🎬 Películas Próximamente</h1>
+                <h1>🎬 Catálogo de Películas</h1>
 
                 @if(session('success'))
                     <div class="alert alert-success">
@@ -804,6 +845,117 @@
                     requestAnimationFrame(animateScroll);
                 }
             }
+            
+            requestAnimationFrame(animateScroll);
+        }
+
+        // Función para confirmar promoción
+        function confirmPromote(event, titulo) {
+            event.preventDefault();
+            
+            if (confirm('¿Estás seguro de que quieres promover "' + titulo + '" a cartelera?\n\nPodrás crear funciones para esta película después de promoverla.')) {
+                event.target.submit();
+            }
+            
+            return false;
+        }
+
+        // Función para confirmar eliminación con efecto
+        function confirmDelete(event, titulo) {
+            event.preventDefault();
+            
+            const card = event.target.closest('.movie-card');
+            card.style.filter = 'brightness(0.5)';
+            
+            if (confirm('¿Estás seguro de que quieres eliminar "' + titulo + '"?')) {
+                card.style.transition = 'all 0.5s ease';
+                card.style.transform = 'scale(0) rotate(180deg)';
+                card.style.opacity = '0';
+                
+                setTimeout(() => {
+                    event.target.submit();
+                }, 500);
+            } else {
+                card.style.filter = 'brightness(1)';
+            }
+            
+            return false;
+        }
+
+        // Efecto parallax mejorado
+        const container = document.getElementById('moviesContainer');
+        if (container) {
+            container.addEventListener('scroll', () => {
+                const cards = document.querySelectorAll('.movie-card');
+                const containerRect = container.getBoundingClientRect();
+                const containerCenter = containerRect.left + containerRect.width / 2;
+
+                cards.forEach(card => {
+                    const cardRect = card.getBoundingClientRect();
+                    const cardCenter = cardRect.left + cardRect.width / 2;
+                    const distance = Math.abs(containerCenter - cardCenter);
+                    const maxDistance = containerRect.width;
+                    const scale = 1 - (distance / maxDistance) * 0.15;
+                    const opacity = Math.max(0.5, 1 - (distance / maxDistance) * 0.5);
+                    
+                    card.style.opacity = opacity;
+                    card.style.transform = `scale(${scale})`;
+                });
+            });
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                scrollMovies('left');
+            } else if (e.key === 'ArrowRight') {
+                scrollMovies('right');
+            }
+        });
+
+        // Animación de entrada escalonada
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.movie-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px) scale(0.8)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 150);
+            });
+        });
+
+        // Efecto de mouse tracking
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.movie-card');
+            
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const percentX = (x - centerX) / centerX;
+                const percentY = (y - centerY) / centerY;
+                
+                if (card.matches(':hover')) {
+                    card.style.transform = `
+                        translateY(-15px) 
+                        scale(1.08) 
+                        rotateY(${percentX * 10}deg) 
+                        rotateX(${-percentY * 10}deg)
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
             
             requestAnimationFrame(animateScroll);
         }

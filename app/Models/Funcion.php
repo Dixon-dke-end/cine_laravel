@@ -22,9 +22,9 @@ use App\Models\Reserva;
      * Relación: una función pertenece a una película.
      * 
      * belongsTo → relación inversa de "una película tiene muchas funciones".
-     * El segundo parámetro ('pelicula') indica la columna que actúa como clave foránea en la tabla 'funcions'.
+     * El segundo parámetro ('movie_id') indica la columna que actúa como clave foránea en la tabla 'funciones'.
      */
-    public function movies()
+    public function movie()
     {
         return $this->belongsTo(Movie::class, 'movie_id'); 
     }
@@ -35,7 +35,7 @@ use App\Models\Reserva;
      * belongsTo → cada función ocurre en una sala específica.
      * El segundo parámetro ('sala_id') es la clave foránea que relaciona con la tabla 'salas'.
      */
-    public function Sala()
+    public function sala()
     {
         return $this->belongsTo(Sala::class, 'sala_id');
     }
@@ -70,7 +70,7 @@ use App\Models\Reserva;
      */
     public function sillasConEstado()
     {
-        return $this->Sala()->first()->sillas()->get()->map(function ($silla) {
+        return $this->sala()->first()->sillas()->get()->map(function ($silla) {
             return [
                 'id' => $silla->id,
                 'fila' => $silla->fila,

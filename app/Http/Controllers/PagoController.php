@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reserva;
+use App\Models\PedidoConfiteria;
+
 use Illuminate\Http\Request;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Preference\PreferenceClient;
@@ -173,7 +175,6 @@ class PagoController extends Controller
         $payment_id = $request->get('payment_id');
         $status = $request->get('status');
         $payment_type = $request->get('payment_type');
-        
         \Log::info('Pago exitoso recibido:', [
             'reserva_id' => $reserva_id,
             'payment_id' => $payment_id,
@@ -444,6 +445,10 @@ class PagoController extends Controller
         $pedido = \App\Models\PedidoConfiteria::with(['productos.producto'])
             ->findOrFail($pedido_id);
         
+        $carrito = Carrito::with('producto')
+            ->where('usuario_id', auth()->id())
+            ->get();
+        
         $payment_id = $request->get('payment_id');
         $status = $request->get('status');
         $payment_type = $request->get('payment_type');
@@ -462,7 +467,18 @@ class PagoController extends Controller
                     'pago_id' => $payment_id,
                     'fecha_pago' => now()
                 ]);
+                            // Crear detalle y reducir stock
+            foreach ($carrito as $item) {
+                PedidoProducto::create([
+                    'pedido_id' => $pedido->id,
+                    'producto_id' => $item->producto_id,
+                    'cantidad' => $item->cantidad,
+                    'precio_unitario' => $item->producto->precio,
+                    'subtotal' => $item->cantidad * $item->producto->precio
+                ]);
 
+                $item->producto->decrement('stock', $item->cantidad);
+            }
                 \Log::info("✅ Pedido confitería {$pedido_id} confirmado exitosamente");
 
                 return view('pagos.success-confiteria', compact('pedido'));
@@ -498,4 +514,210 @@ class PagoController extends Controller
         
         return view('pagos.failure-confiteria', compact('pedido'));
     }
+
+/**
+ * Muestra la página de pago unificado (Reserva + Confitería opcional)
+ */
+public function mostrarPagoUnificado(Request $request)
+{
+    $reservaId = $request->get('reserva_id');
+    $pedidoId = $request->get('pedido_id');
+
+    // Validar reserva
+    $reserva = Reserva::with(['funcion.movies', 'funcion.Sala', 'sillas.silla', 'usuario'])
+        ->where('id', $reservaId)
+        ->where('usuario_id', auth()->id())
+        ->firstOrFail();
+
+    // Verificar que la reserva esté pendiente
+    if ($reserva->estado !== 'pendiente') {
+        return redirect()->route('user.index')
+            ->with('error', 'Esta reserva ya fue procesada');
+    }
+
+    // Verificar expiración
+    if ($reserva->hasExpired()) {
+        $reserva->update(['estado' => 'cancelada']);
+        return redirect()->route('user.index')
+            ->with('error', 'Tu reserva ha expirado');
+    }
+
+    // Obtener pedido de confitería si existe
+    $pedidoConfiteria = null;
+    if ($pedidoId) {
+        $pedidoConfiteria = PedidoConfiteria::with('productos.producto')
+            ->where('id', $pedidoId)
+            ->where('usuario_id', auth()->id())
+            ->where('reserva_id', $reservaId)
+            ->first();
+    }
+
+    // Calcular total combinado
+    $totalReserva = $reserva->precio_total;
+    $totalConfiteria = $pedidoConfiteria ? $pedidoConfiteria->total : 0;
+    $totalFinal = $totalReserva + $totalConfiteria;
+
+    return view('pagos.checkout-unificado', compact(
+        'reserva',
+        'pedidoConfiteria',
+        'totalReserva',
+        'totalConfiteria',
+        'totalFinal'
+    ));
+}
+
+public function crearPreferenciaMercadoPagoUnificado(Request $request)
+{
+    $reservaId = $request->get('reserva_id');
+    $pedidoId = $request->get('pedido_id');
+
+    // Cargar reserva con relaciones necesarias
+    $reserva = Reserva::with(['funcion.movies'])->findOrFail($reservaId);
+    
+    // Verificar propiedad
+    if ($reserva->usuario_id !== auth()->id()) {
+        return response()->json(['error' => 'Acceso denegado'], 403);
+    }
+
+    try {
+        if (app()->environment('local')) {
+            $this->disableSSLVerification();
+        }
+
+        $client = new PreferenceClient();
+        $items = [];
+        
+        // Item de la reserva (boletas)
+        $items[] = [
+            'id' => 'reserva_' . $reserva->id,
+            'title' => "Boletas - {$reserva->funcion->movies->titulo}",
+            'description' => 'Entradas para ' . $reserva->funcion->movies->titulo,
+            'quantity' => $reserva->cantidad_asientos,
+            'unit_price' => (float) ($reserva->precio_total / $reserva->cantidad_asientos),
+            'currency_id' => 'COP'
+        ];
+
+        // Items de confitería (si existen)
+        $pedido = null;
+        if ($pedidoId) {
+            $pedido = PedidoConfiteria::with('productos.producto')->findOrFail($pedidoId);
+            
+            foreach ($pedido->productos as $item) {
+                $items[] = [
+                    'id' => 'producto_' . $item->producto_id,
+                    'title' => $item->producto->nombre,
+                    'description' => $item->producto->descripcion ?? 'Producto de confitería',
+                    'quantity' => $item->cantidad,
+                    'unit_price' => (float) $item->precio_unitario,
+                    'currency_id' => 'COP'
+                ];
+            }
+        }
+
+        $preferenceData = [
+            'items' => $items,
+            'back_urls' => [
+                'success' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/unificado/success?reserva_id=' . $reservaId . '&pedido_id=' . ($pedidoId ?? ''),
+                'failure' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/unificado/failure?reserva_id=' . $reservaId . '&pedido_id=' . ($pedidoId ?? ''),
+                'pending' => 'https://cecilia-thiocyano-michael.ngrok-free.dev/pagos/unificado/success?reserva_id=' . $reservaId . '&pedido_id=' . ($pedidoId ?? '')
+            ],
+            'auto_return' => 'approved',
+            'external_reference' => json_encode([
+                'reserva_id' => $reservaId,
+                'pedido_id' => $pedidoId,
+                'tipo' => 'unificado'
+            ]),
+            'statement_descriptor' => 'CINEVEL',
+            'notification_url' => url('/webhooks/mercadopago'),
+            'payer' => [
+                'name' => auth()->user()->name ?? 'Cliente',
+                'email' => auth()->user()->email ?? 'cliente@cinevel.com'
+            ]
+        ];
+
+        $preference = $client->create($preferenceData);
+
+        \Log::info('✅ Preferencia unificada creada:', [
+            'preference_id' => $preference->id,
+            'reserva_id' => $reservaId,
+            'pedido_id' => $pedidoId
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'preference_id' => $preference->id,
+            'init_point' => $preference->init_point
+        ]);
+
+    } catch (MPApiException $e) {
+        \Log::error('Error API Mercado Pago (Unificado):', [
+            'status' => $e->getApiResponse()->getStatusCode(),
+            'content' => $e->getApiResponse()->getContent(),
+            'reserva_id' => $reservaId,
+            'pedido_id' => $pedidoId
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar el pago con Mercado Pago'
+        ], 500);
+
+    } catch (\Exception $e) {
+        \Log::error('Error general al crear preferencia (Unificado):', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'reserva_id' => $reservaId,
+            'pedido_id' => $pedidoId
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar el pago: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Manejar éxito de pago unificado
+ */
+public function pagoExitosoUnificado(Request $request)
+{
+    $reservaId = $request->get('reserva_id');
+    $pedidoId = $request->get('pedido_id');
+    $paymentId = $request->get('payment_id');
+    $status = $request->get('status');
+
+    $reserva = Reserva::findOrFail($reservaId);
+    
+    // Actualizar reserva
+    $reserva->update([
+        'estado' => 'confirmada',
+        'estado_pago' => $status === 'approved' ? 'aprobado' : 'pendiente',
+        'pago_id' => $paymentId,
+        'metodo_pago' => 'mercadopago',
+        'fecha_pago' => now()
+    ]);
+
+    // Actualizar pedido de confitería si existe
+    if ($pedidoId) {
+        $pedido = PedidoConfiteria::findOrFail($pedidoId);
+        $pedido->update(['estado' => 'pagado']);
+    }
+
+    return redirect()->route('reservas.show', $reserva->id)
+        ->with('success', '¡Pago exitoso! Tu reserva ha sido confirmada.');
+}
+
+/**
+ * Manejar fallo de pago unificado
+ */
+public function pagoFallidoUnificado(Request $request)
+{
+    $reservaId = $request->get('reserva_id');
+
+    return redirect()->route('pagos.checkout.unificado', [
+        'reserva_id' => $reservaId,
+        'pedido_id' => $request->get('pedido_id')
+    ])->with('error', 'El pago no pudo ser procesado. Intenta nuevamente.');
+}
 }

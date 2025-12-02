@@ -6,28 +6,119 @@
     <title>Catálogo de Películas</title>
     @vite(['resources/css/admin_index.css', 'resources/js/app.js'])
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2942 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(22, 33, 62, 0.98);
+            border-bottom: 2px solid #00d4ff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .btn-add-navbar {
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-add-navbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* MAIN CONTAINER */
         .main-container {
             display: flex;
             margin-top: 70px;
             min-height: calc(100vh - 70px);
         }
 
+        /* SIDEBAR */
         .sidebar {
-            width: 280px;
-            background: rgba(22, 33, 62, 0.95);
-            padding: 2rem 0;
-            border-right: 2px solid #00d4ff;
-            overflow-y: auto;
-            max-height: calc(100vh - 70px);
             position: fixed;
             left: 0;
             top: 70px;
+            width: 280px;
             height: calc(100vh - 70px);
+            background: rgba(22, 33, 62, 0.95);
+            border-right: 2px solid #00d4ff;
+            padding: 2rem 0;
+            overflow-y: auto;
             z-index: 900;
         }
 
@@ -112,25 +203,289 @@
             padding-left: 2.3rem;
         }
 
+        /* CONTENT WRAPPER */
         .content-wrapper {
             margin-left: 280px;
             flex: 1;
             width: calc(100% - 280px);
+            padding: 2rem;
+            overflow-y: auto;
         }
 
-        .navbar {
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        .navbar-user {
+        .content h1 {
+            margin-bottom: 2rem;
+            color: #00d4ff;
+            font-size: 2.2rem;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
+        .alert-success {
+            background: rgba(76, 175, 80, 0.15);
+            border-left-color: #4CAF50;
+            color: #fff;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.15);
+            border-left-color: #f44336;
+            color: #fff;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            border: 2px dashed #00d4ff;
+            margin-top: 2rem;
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .btn-add {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* MOVIES WRAPPER */
+        .movies-wrapper {
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .nav-button:hover {
+            background: rgba(0, 212, 255, 0.4);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-button.left {
+            left: -30px;
+        }
+
+        .nav-button.right {
+            right: -30px;
+        }
+
+        .movies-container {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding: 2rem 0;
+            scroll-behavior: smooth;
+        }
+
+        .movie-card {
+            flex: 0 0 280px;
+            background: rgba(0, 212, 255, 0.05);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .movie-poster-container {
+            position: relative;
+            overflow: hidden;
+            height: 350px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-poster {
+            transform: scale(1.05);
+        }
+
+        .movie-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.8));
+        }
+
+        .movie-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 193, 7, 0.9);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .movie-info {
+            padding: 1.5rem;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+
+        .movie-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            flex-wrap: wrap;
+        }
+
+        .movie-year, .movie-duration {
+            display: inline-block;
+        }
+
+        .movie-author {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-description {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn {
+            padding: 0.6rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: #fff;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-promote {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: #fff;
+        }
+
+        .btn-promote:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        form {
+            width: 100%;
+        }
+
+        form .btn {
+            width: 100%;
+        }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .sidebar {
                 width: 250px;
@@ -139,6 +494,29 @@
             .content-wrapper {
                 margin-left: 250px;
                 width: calc(100% - 250px);
+                padding: 1rem;
+            }
+
+            .nav-button.left {
+                left: 0;
+            }
+
+            .nav-button.right {
+                right: 0;
+            }
+
+            .navbar {
+                padding: 1rem;
+                height: 70px;
+            }
+
+            .navbar-container {
+                gap: 1rem;
+            }
+
+            .btn-add-navbar {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
             }
         }
 
@@ -147,19 +525,70 @@
                 display: none;
             }
 
+            .main-container {
+                margin-top: 70px;
+            }
+
             .content-wrapper {
                 margin-left: 0;
                 width: 100%;
+                padding: 1rem;
             }
 
-            .main-container {
-                margin-top: 0;
+            .movies-container {
+                padding: 1rem 0;
+            }
+
+            .movie-card {
+                flex: 0 0 200px;
+            }
+
+            .navbar {
+                padding: 0.8rem;
+                height: auto;
+                flex-wrap: wrap;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-user {
+                gap: 0.5rem;
+            }
+
+            .btn-add-navbar {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .content h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .movie-card {
+                flex: 0 0 150px;
+            }
+
+            .movie-poster-container {
+                height: 220px;
+            }
+
+            .movie-title {
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                font-size: 0.8rem;
+                padding: 0.4rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('movies.index') }}" class="navbar-brand">
@@ -175,41 +604,18 @@
                             I
                         @endauth
                     </div>
-                    <span class="user-name">
-                        @auth
-                            {{ Auth::user()->name }}
-                        @else
-                            Invitado
-                        @endauth
-                    </span>
+                    <span>{{ Auth::user()->name ?? 'Invitado' }}</span>
                 </div>
-                
-                @guest
-                    <a href="{{ route('login') }}" class="btn-dashboard">
-                        🔐 Iniciar Sesión
-                    </a>
-                @endguest
-                
-                @auth
-                    <a href="{{ route('dashboard') }}" class="btn-dashboard">
-                        📊 Dashboard
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            🚪 Cerrar Sesión
-                        </button>
-                    </form>
-                @endauth
+                <a href="{{ route('movies.create') }}" class="btn-add-navbar">
+                    ➕ Agregar Película
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- Partículas de fondo -->
-    <div class="particles" id="particles"></div>
-
+    <!-- MAIN CONTAINER -->
     <div class="main-container">
-        <!-- Sidebar Acordeón -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-title">Menú Principal</div>
 
@@ -299,15 +705,25 @@
             @endauth
         </aside>
 
+        <!-- CONTENT WRAPPER -->
         <div class="content-wrapper">
-            <div class="container">
-                <div class="header">
-                    <h1>🎬 Catálogo de Películas</h1>
-                    <a href="{{ route('movies.create') }}" class="btn-add">
-                        <span>➕ Agregar Película</span>
-                    </a>
-                </div>
+            <div class="content">
+                <h1>🎬 Catálogo de Películas</h1>
+
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
                 
+                @if(session('error'))
+                    <div class="alert alert-error">
+                        <span>❌</span>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
                 @if($movies->isEmpty())
                     <div class="empty-state">
                         <h2>📽️ No hay películas registradas</h2>
@@ -321,9 +737,7 @@
                         
                         <div class="movies-container" id="moviesContainer">
                             @foreach($movies as $peli)
-                                <div class="movie-card" style="position: relative;">
-                                    <a href="{{ route('movies.show', $peli->id) }}" style="position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 80px); z-index: 1; cursor: pointer;" title="Ver detalles y reservar"></a>
-                                    <div class="shine"></div>
+                                <div class="movie-card">
                                     <div class="movie-poster-container">
                                         <img src="{{ asset('storage/'.$peli->ruta_imagen) }}" 
                                              alt="Imagen de {{ $peli->titulo }}" 
@@ -351,21 +765,19 @@
                                             {{ $peli->descripcion ?? 'Sin descripción disponible' }}
                                         </div>
 
-                                        <div class="movie-actions" style="position: relative; z-index: 2;">
-                                            <a href="{{ route('movies.show', $peli->id) }}" class="btn btn-edit" onclick="event.stopPropagation();" style="flex: 1;">
-                                                <span>🎫Reservaciones</span>
+                                        <div class="movie-actions">
+                                            <a href="{{ route('movies.show', $peli->id) }}" class="btn btn-promote">
+                                                <span>🎫 Reservaciones</span>
                                             </a>
-                                            <a href="{{ route('movies.edit', $peli->id) }}" class="btn btn-edit" onclick="event.stopPropagation();">
+                                            <a href="{{ route('movies.edit', $peli->id) }}" class="btn btn-edit">
                                                 <span>✏️ Editar</span>
                                             </a>
                                             <form action="{{ route('movies.destroy', $peli->id) }}" 
                                                   method="POST" 
-                                                  style="flex: 1;"
-                                                  onsubmit="return confirmDelete(event, '{{ $peli->titulo }}')"
-                                                  onclick="event.stopPropagation();">
+                                                  onsubmit="return confirmDelete(event, '{{ $peli->titulo }}')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-delete" style="width: 100%;">
+                                                <button type="submit" class="btn btn-delete">
                                                     <span>🗑️ Eliminar</span>
                                                 </button>
                                             </form>
@@ -395,27 +807,6 @@
 
             header.classList.toggle('active');
             content.classList.toggle('active');
-        }
-
-        // Crear partículas de fondo
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 20;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                const size = Math.random() * 60 + 20;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                
-                particlesContainer.appendChild(particle);
-            }
         }
 
         // Función para desplazar las películas con efecto
@@ -451,139 +842,14 @@
             requestAnimationFrame(animateScroll);
         }
 
-        // Función para seleccionar una película con efectos
-        function selectMovie(card) {
-            card.classList.add('clicked');
-            
-            const ripple = document.createElement('div');
-            ripple.style.position = 'absolute';
-            ripple.style.borderRadius = '50%';
-            ripple.style.background = 'rgba(255,255,255,0.5)';
-            ripple.style.width = '20px';
-            ripple.style.height = '20px';
-            ripple.style.animation = 'ripple 1s ease-out';
-            ripple.style.top = '50%';
-            ripple.style.left = '50%';
-            ripple.style.transform = 'translate(-50%, -50%)';
-            ripple.style.pointerEvents = 'none';
-            
-            card.style.position = 'relative';
-            card.appendChild(ripple);
-            
-            setTimeout(() => {
-                card.classList.remove('clicked');
-                ripple.remove();
-            }, 600);
-        }
-
-        // Función para confirmar eliminación con efecto
+        // Función para confirmar eliminación
         function confirmDelete(event, titulo) {
-            event.preventDefault();
-            
-            const card = event.target.closest('.movie-card');
-            card.style.filter = 'brightness(0.5)';
-            
-            if (confirm('¿Estás seguro de que quieres eliminar "' + titulo + '"?')) {
-                card.style.transition = 'all 0.5s ease';
-                card.style.transform = 'scale(0) rotate(180deg)';
-                card.style.opacity = '0';
-                
-                setTimeout(() => {
-                    event.target.submit();
-                }, 500);
-            } else {
-                card.style.filter = 'brightness(1)';
+            if (!confirm('¿Estás seguro de que quieres eliminar "' + titulo + '"?')) {
+                event.preventDefault();
+                return false;
             }
-            
-            return false;
+            return true;
         }
-
-        // Efecto parallax mejorado
-        const container = document.getElementById('moviesContainer');
-        if (container) {
-            container.addEventListener('scroll', () => {
-                const cards = document.querySelectorAll('.movie-card');
-                const containerRect = container.getBoundingClientRect();
-                const containerCenter = containerRect.left + containerRect.width / 2;
-
-                cards.forEach(card => {
-                    const cardRect = card.getBoundingClientRect();
-                    const cardCenter = cardRect.left + cardRect.width / 2;
-                    const distance = Math.abs(containerCenter - cardCenter);
-                    const maxDistance = containerRect.width;
-                    const scale = 1 - (distance / maxDistance) * 0.15;
-                    const opacity = Math.max(0.5, 1 - (distance / maxDistance) * 0.5);
-                    
-                    card.style.opacity = opacity;
-                    card.style.transform = `scale(${scale})`;
-                });
-            });
-        }
-
-        // Navegación con teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                scrollMovies('left');
-            } else if (e.key === 'ArrowRight') {
-                scrollMovies('right');
-            }
-        });
-
-        // Animación de entrada escalonada
-        window.addEventListener('load', () => {
-            createParticles();
-            
-            const cards = document.querySelectorAll('.movie-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(50px) scale(0.8)';
-                
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0) scale(1)';
-                }, index * 150);
-            });
-        });
-
-        // Efecto de mouse tracking
-        document.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.movie-card');
-            
-            cards.forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const percentX = (x - centerX) / centerX;
-                const percentY = (y - centerY) / centerY;
-                
-                if (card.matches(':hover')) {
-                    card.style.transform = `
-                        translateY(-15px) 
-                        scale(1.08) 
-                        rotateY(${percentX * 10}deg) 
-                        rotateX(${-percentY * 10}deg)
-                    `;
-                }
-            });
-        });
-
-        // Agregar animación de ripple al CSS dinámicamente
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                to {
-                    width: 500px;
-                    height: 500px;
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

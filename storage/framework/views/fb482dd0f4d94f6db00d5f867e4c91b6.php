@@ -6,6 +6,126 @@
     <title>Crear Película</title>
     <!-- Importación de estilos y scripts de Laravel con Vite -->
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_create.css', 'resources/js/app.js']); ?>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-container {
+            display: flex;
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(22, 33, 62, 0.95);
+            padding: 2rem 0;
+            border-right: 2px solid #00d4ff;
+            overflow-y: auto;
+            max-height: calc(100vh - 70px);
+            position: fixed;
+            left: 0;
+            top: 70px;
+            height: calc(100vh - 70px);
+            z-index: 900;
+        }
+
+        .sidebar-title {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            color: #00d4ff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            margin-bottom: 0.5rem;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .accordion-header {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95rem;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .accordion-header:hover {
+            background: rgba(0, 212, 255, 0.1);
+            padding-left: 1.8rem;
+        }
+
+        .accordion-header.active {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+        }
+
+        .accordion-links {
+            padding: 0.5rem 0;
+        }
+
+        .accordion-link {
+            display: block;
+            padding: 0.8rem 2rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .accordion-link:hover {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: #00d4ff;
+            padding-left: 2.3rem;
+        }
+
+        .content-wrapper {
+            margin-left: 280px;
+            flex: 1;
+            width: calc(100% - 280px);
+        }
+
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -17,11 +137,6 @@
             
             <div style="display: flex; align-items: center; gap: 15px;">
                 <?php if(auth()->guard()->check()): ?>
-                    <?php if(Auth::user()->role === 'admin'): ?>
-                        <a href="<?php echo e(route('user.index')); ?>" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;" title="Ver vista de usuario">
-                            👤 Vista Usuario
-                        </a>
-                    <?php endif; ?>
                     
                     <a href="<?php echo e(route('dashboard')); ?>" style="padding: 8px 20px; border-radius: 20px; text-decoration: none; background: rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease;">
                         📊 Dashboard
@@ -41,6 +156,86 @@
     <!-- Partículas de fondo -->
     <div class="particles" id="particles"></div>
 
+    <div class="main-container">
+        <!-- Sidebar Acordeón -->
+        <aside class="sidebar">
+            <div class="sidebar-title">Menú Principal</div>
+
+            <?php if(auth()->guard()->check()): ?>
+                <!-- Sección Películas -->
+                <div class="accordion-item">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                        <span>🎬 Películas</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content active">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('movies.index')); ?>" class="accordion-link">📋 Ver Todas</a>
+                            <a href="<?php echo e(route('movies.create')); ?>" class="accordion-link">➕ Agregar Nueva</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Funciones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>📅 Funciones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('funciones.index')); ?>" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="<?php echo e(route('funciones.create')); ?>" class="accordion-link">➕ Agregar Función</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Confitería -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🍿 Confitería</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('confiteria.index')); ?>" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="<?php echo e(route('confiteria.create')); ?>" class="accordion-link">➕ Agregar Producto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Próximamente -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🎥 Próximamente</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Usuarios -->
+                <?php if(Auth::user()->role === 'admin'): ?>
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>👥 Usuarios</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            <?php endif; ?>
+        </aside>
+
+    <div class="content-wrapper">
     <div class="container">
         <div class="form-card">
             <div class="header">
@@ -164,8 +359,25 @@
             </form>
         </div>
     </div>
+    </div>
+    </div>
 
     <script>
+        // Toggle Acordeón
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                if (h !== header) {
+                    h.classList.remove('active');
+                    h.nextElementSibling.classList.remove('active');
+                }
+            });
+
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
         // Crear partículas de fondo
         function createParticles() {
             const particlesContainer = document.getElementById('particles');

@@ -33,7 +33,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg-body);
+            background-image: url(/storage/movies/portada.jpg);
             color: var(--text-main);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;

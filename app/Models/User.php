@@ -56,4 +56,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Reserva::class, 'usuario_id');
     }
+
+    /**
+     * Relación uno a muchos: un usuario puede tener muchos pedidos de confitería.
+     *
+     * hasMany → significa que este modelo (User) está relacionado con muchos registros del modelo PedidoConfiteria.
+     * 'usuario_id' → es la clave foránea en la tabla 'pedido_confiterias' que apunta al ID del usuario.
+     */
+    public function pedidosConfiteria()
+    {
+        return $this->hasMany(PedidoConfiteria::class, 'usuario_id');
+    }
 }

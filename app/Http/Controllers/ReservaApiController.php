@@ -24,117 +24,125 @@ class ReservaApiController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
-{
-    \Log::info('🚀 LLEGÓ LA PETICIÓN A Laravel');
-    \Log::info('📩 Datos recibidos:', ['request_all' => request()->all()]);
-    
-    // Validación
-    $validated = $request->validate([
-        'funcion_id' => 'required|exists:funciones,id',
-        'sillas_ids' => 'required|array|min:1|max:20',
-        'sillas_ids.*' => 'required|exists:sillas,id|integer',
-        'precio_total' => 'required|numeric|min:0.01',
-    ]);
-    
-    \Log::info('📝 Datos validados:', $validated);
-
-    DB::beginTransaction();  // ⬅️ AGREGAR ESTA LÍNEA AQUÍ
-
-    try {
-        // Obtener la función
-        $funcion = Funcion::lockForUpdate()->findOrFail($validated['funcion_id']);
-
-        // Verificar que la función no esté en el pasado
-        if (\Carbon\Carbon::parse($funcion->hora)->isPast()) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,  // ⬅️ Cambia 'error' por 'success' para consistencia
-                'message' => 'No puedes reservar una función que ya pasó.'
-            ], 422);
-        }
-
-        // Obtener sillas ocupadas para esta función
-        // IGNORANDO reservas expiradas o canceladas
-        $sillasOcupadas = Silla::whereHas('reservasSillas', function ($query) use ($validated) {
-            $query->whereHas('reserva', function ($q) use ($validated) {
-                $q->where('funcion_id', $validated['funcion_id'])
-                ->where('estado', '!=', 'cancelada')
-                ->where(function($subQ) {
-                    // Solo contar reservas confirmadas o pendientes que no expiraron
-                    $subQ->where('estado', 'confirmada')
-                        ->orWhere(function($pendingQ) {
-                            $pendingQ->where('estado', 'pendiente')
-                                        ->where(function($expireQ) {
-                                            $expireQ->whereNull('expires_at')
-                                                    ->orWhere('expires_at', '>', now());
-                                        });
-                        });
-                });
-            });
-        })->pluck('id')->toArray();
-
-        // Verificar conflictos
-        $sillaConflicto = array_intersect($validated['sillas_ids'], $sillasOcupadas);
-        if (!empty($sillaConflicto)) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Una o más sillas ya fueron reservadas.',
-                'sillas_conflicto' => $sillaConflicto
-            ], 409);
-        }
-
-        // Validar que las sillas pertenecen a la sala correcta
-        $sillasValidas = Silla::whereIn('id', $validated['sillas_ids'])
-            ->where('sala_id', $funcion->sala_id)
-            ->count();
-
-        if ($sillasValidas !== count($validated['sillas_ids'])) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Una o más sillas no pertenecen a esta sala.'
-            ], 422);
-        }
+    {
+        \Log::info('🚀 LLEGÓ LA PETICIÓN A Laravel');
+        \Log::info('📩 Datos recibidos:', ['request_all' => request()->all()]);
         
-        // Crear la reserva
-        $reserva = Reserva::create([
-            'funcion_id' => $validated['funcion_id'],
-            'usuario_id' => auth()->id(),
-            'cantidad_asientos' => count($validated['sillas_ids']),
-            'precio_total' => $validated['precio_total'],
-            'estado' => 'pendiente',
-             'expires_at' => now()->addMinutes(15) 
+        // Validación
+        $validated = $request->validate([
+            'funcion_id' => 'required|exists:funciones,id',
+            'sillas_ids' => 'required|array|min:1|max:20',
+            'sillas_ids.*' => 'required|exists:sillas,id|integer',
+            'precio_total' => 'required|numeric|min:0.01',
         ]);
+        
+        \Log::info('📝 Datos validados:', $validated);
 
-        // Crear registros en reservas_sillas
-        foreach ($validated['sillas_ids'] as $sillaId) {
-            ReservaSilla::create([
-                'reserva_id' => $reserva->id,
-                'silla_id' => $sillaId
+        DB::beginTransaction();
+
+        try {
+            // Obtener la función
+            $funcion = Funcion::lockForUpdate()->findOrFail($validated['funcion_id']);
+
+            // Verificar que la función no esté en el pasado
+            if (\Carbon\Carbon::parse($funcion->hora)->isPast()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes reservar una función que ya pasó.'
+                ], 422);
+            }
+
+            // Obtener sillas ocupadas para esta función
+            // IGNORANDO reservas expiradas o canceladas
+            $sillasOcupadas = Silla::whereHas('reservasSillas', function ($query) use ($validated) {
+                $query->whereHas('reserva', function ($q) use ($validated) {
+                    $q->where('funcion_id', $validated['funcion_id'])
+                    ->where('estado', '!=', 'cancelada')
+                    ->where(function($subQ) {
+                        // Solo contar reservas confirmadas o pendientes que no expiraron
+                        $subQ->where('estado', 'confirmada')
+                            ->orWhere(function($pendingQ) {
+                                $pendingQ->where('estado', 'pendiente')
+                                            ->where(function($expireQ) {
+                                                $expireQ->whereNull('expires_at')
+                                                        ->orWhere('expires_at', '>', now());
+                                            });
+                            });
+                    });
+                });
+            })->pluck('id')->toArray();
+
+            // Verificar conflictos
+            $sillaConflicto = array_intersect($validated['sillas_ids'], $sillasOcupadas);
+            if (!empty($sillaConflicto)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Una o más sillas ya fueron reservadas.',
+                    'sillas_conflicto' => $sillaConflicto
+                ], 409);
+            }
+
+            // Validar que las sillas pertenecen a la sala correcta
+            $sillasValidas = Silla::whereIn('id', $validated['sillas_ids'])
+                ->where('sala_id', $funcion->sala_id)
+                ->count();
+
+            if ($sillasValidas !== count($validated['sillas_ids'])) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Una o más sillas no pertenecen a esta sala.'
+                ], 422);
+            }
+            
+            // Crear la reserva
+            $reserva = Reserva::create([
+                'funcion_id' => $validated['funcion_id'],
+                'usuario_id' => auth()->id(),
+                'cantidad_asientos' => count($validated['sillas_ids']),
+                'precio_total' => $validated['precio_total'],
+                'estado' => 'pendiente',
+                'expires_at' => now()->addMinutes(15) 
             ]);
+
+            // Crear registros en reservas_sillas
+            foreach ($validated['sillas_ids'] as $sillaId) {
+                ReservaSilla::create([
+                    'reserva_id' => $reserva->id,
+                    'silla_id' => $sillaId
+                ]);
+            }
+
+            DB::commit();
+
+            // Cargar relaciones para respuesta
+            $reserva->load(['sillas.silla', 'funcion.movies', 'funcion.Sala']);
+
+            // 🎯 RESPUESTA MODIFICADA PARA REDIRIGIR A CONFITERÍA
+            return response()->json([
+                'success' => true,
+                'message' => 'Reserva creada exitosamente',
+                'reserva' => [
+                    'id' => $reserva->id,
+                    'funcion_id' => $reserva->funcion_id,
+                    'cantidad_asientos' => $reserva->cantidad_asientos,
+                    'precio_total' => $reserva->precio_total,
+                    'estado' => $reserva->estado
+                ],
+                'redirect_url' => route('confiteria.reserva', $reserva->id) // 🔗 URL de confitería
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('❌ Error al crear reserva:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la reserva: ' . $e->getMessage()
+            ], 500);
         }
-
-        DB::commit();
-
-        // Cargar relaciones para respuesta
-        $reserva->load(['sillas.silla', 'funcion.movies', 'funcion.Sala']);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Reserva creada exitosamente',
-            'reserva' => $reserva
-        ], 201);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('❌ Error al crear reserva:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al crear la reserva: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     /**
      * GET /api/reservas/{id}
@@ -196,9 +204,6 @@ class ReservaApiController extends Controller
             // Marcar como cancelada
             $reserva->update(['estado' => 'cancelada']);
 
-            // Las sillas se liberan automáticamente (no es necesario eliminar de reservas_sillas,
-            // solo nos fijamos en estado 'cancelada' al verificar disponibilidad)
-
             DB::commit();
 
             return response()->json([
@@ -227,5 +232,30 @@ class ReservaApiController extends Controller
             ->get();
 
         return response()->json($reservas);
+    }
+
+    /**
+     * GET /api/funciones/{id}/sillas
+     * 
+     * Obtiene las sillas de una función con su estado de ocupación
+     */
+    public function getSillas($id)
+    {
+        $funcion = Funcion::with('Sala.sillas')->findOrFail($id);
+        
+        $sillas = $funcion->Sala->sillas->map(function($silla) use ($id) {
+            return [
+                'id' => $silla->id,
+                'fila' => $silla->fila,
+                'numero' => $silla->numero,
+                'tipo' => $silla->tipo,
+                'ocupada' => $silla->estaOcupadaPara($id)
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'sillas' => $sillas
+        ]);
     }
 }

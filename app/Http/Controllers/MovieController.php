@@ -166,35 +166,30 @@ class MovieController extends Controller
             ], 400);
         }
         
-        // Obtener funciones
+        $ahora = \Carbon\Carbon::now();
+        
+        // Obtener solo funciones futuras de esa fecha
         $funciones = \App\Models\Funcion::where('movie_id', $movieId)
             ->whereDate('hora', $fecha)
-            ->with(['sala'])
+            ->where('hora', '>', $ahora) // Solo funciones futuras
+            ->with('sala')
             ->orderBy('hora', 'asc')
             ->get();
         
+        // Si no hay funciones futuras, retornar empty
         if ($funciones->isEmpty()) {
             return response()->json([
                 'success' => true,
                 'empty' => true
             ]);
         }
-
-        foreach ($funciones as $funcion) {
-            if ($funcion->hora < now()) {
-            return response()->json([
-                'success' => true,
-                'empty' => true
-            ]);
-             }
-        }
         
         // Agrupar por nombre de sala
-        $salasPorFecha = $funciones->groupBy('sala.nombre_sala');
+        $funcionesAgrupadas = $funciones->groupBy('sala.nombre_sala');
         
         $html = '';
         
-        foreach ($salasPorFecha as $salaNombre => $funcionesSala) {
+        foreach ($funcionesAgrupadas as $salaNombre => $funcionesSala) {
             $html .= '<div class="cinema-card">';
             $html .= '<div class="cinema-info">';
             $html .= '<div class="cinema-name">🎭 ' . htmlspecialchars($salaNombre) . '</div>';
@@ -217,13 +212,12 @@ class MovieController extends Controller
         
         return response()->json([
             'success' => true,
-            'html' => $html,
-            'empty' => false
+            'empty' => false,
+            'html' => $html
         ]);
         
     } catch (\Exception $e) {
-        // Log del error para debugging
-        \Log::error('Error en getFuncionesPorFecha: ' . $e->getMessage());
+        \Log::error('Error en funcionesPorFecha: ' . $e->getMessage());
         
         return response()->json([
             'success' => false,
@@ -232,6 +226,5 @@ class MovieController extends Controller
         ], 500);
     }
 }
-
 
 }

@@ -29,13 +29,15 @@
                             Admin
                         </a>
                     <?php endif; ?>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+                    <a href="<?php echo e(route('user.perfil')); ?>" style="text-decoration: none;">
+                        <div class="user-info" style="cursor: pointer;">
+                            <div class="user-avatar">
+                                <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
 
+                            </div>
+                            <span class="user-name"><?php echo e(Auth::user()->name); ?></span>
                         </div>
-                        <span class="user-name"><?php echo e(Auth::user()->name); ?></span>
-                    </div>
+                    </a>
                     <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
                         <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-auth btn-logout">

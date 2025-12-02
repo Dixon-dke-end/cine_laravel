@@ -172,6 +172,27 @@ class reservasController extends Controller
     }
 
     /**
+     * Display reservation with confiteria option
+     */
+    public function showComfi(string $id)
+    {
+        // Obtener la reserva con sus relaciones
+        $reserva = Reserva::with([
+            'funcion.movies',
+            'funcion.Sala',
+            'usuario',
+            'sillas.silla'
+        ])->findOrFail($id);
+        
+        // Verificar que el usuario sea el dueño de la reserva
+        if ($reserva->usuario_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para ver esta reserva');
+        }
+        
+        return view('user.reservaComfi', compact('reserva'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)

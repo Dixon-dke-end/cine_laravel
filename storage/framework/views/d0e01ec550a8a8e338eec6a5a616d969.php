@@ -6,12 +6,10 @@
     <title><?php echo e($movie->titulo); ?> - CineVel</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-        * {
+* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-
         }
 
         :root {
@@ -39,10 +37,11 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-gray);
+            background-image: url(/storage/movies/portada.jpg);
             color: var(--text-dark);
             line-height: 1.6;
             overflow-x: hidden;
+            
         }
 
         /* Navigation */
@@ -563,12 +562,50 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        /* Cinema Group */
+        /* Cinema Cards - ESTRUCTURA ACTUALIZADA */
+        .cinema-card {
+            background: white;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cinema-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .cinema-info {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .cinema-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .cinema-address {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        /* Cinema Group - ESTRUCTURA ANTIGUA (mantener por compatibilidad) */
         .cinema-group {
             margin-bottom: 2.5rem;
         }
 
-        .cinema-name {
+        .cinema-group .cinema-name {
             font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 1.25rem;
@@ -578,12 +615,15 @@
             color: var(--text-dark);
         }
 
+        /* Showtimes Grid - COMPATIBLE CON AMBAS ESTRUCTURAS */
         .showtimes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 1rem;
         }
 
+        /* Showtime Buttons - ESTILOS UNIFICADOS */
+        .showtime-btn,
         .showtime-card {
             background: white;
             border: 2px solid rgba(102, 126, 234, 0.15);
@@ -592,8 +632,16 @@
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            font-family: inherit;
+            font-size: inherit;
         }
 
+        .showtime-btn:hover:not(:disabled),
         .showtime-card:hover:not(:disabled) {
             background: var(--gradient-primary);
             border-color: transparent;
@@ -605,10 +653,11 @@
         .showtime-time {
             font-size: 1.5rem;
             font-weight: 800;
-            margin-bottom: 0.25rem;
             color: var(--text-dark);
+            display: block;
         }
 
+        .showtime-btn:hover:not(:disabled) .showtime-time,
         .showtime-card:hover:not(:disabled) .showtime-time {
             color: white;
         }
@@ -617,12 +666,15 @@
             font-size: 0.75rem;
             color: var(--text-light);
             font-weight: 600;
+            display: block;
         }
 
+        .showtime-btn:hover:not(:disabled) .showtime-room,
         .showtime-card:hover:not(:disabled) .showtime-room {
             color: rgba(255, 255, 255, 0.9);
         }
 
+        .showtime-btn:disabled,
         .showtime-card:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -754,6 +806,23 @@
             border: none;
         }
 
+        /* Animación de entrada para elementos dinámicos */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cinema-card,
+        .cinema-group {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .content-grid {
@@ -796,6 +865,10 @@
                 padding: 1.5rem;
             }
 
+            .cinema-card {
+                padding: 1.5rem;
+            }
+
             .date-selector {
                 padding: 1.5rem;
             }
@@ -808,6 +881,15 @@
             .showtimes-grid {
                 grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
                 gap: 0.75rem;
+            }
+
+            .showtime-btn,
+            .showtime-card {
+                padding: 1rem 0.75rem;
+            }
+
+            .showtime-time {
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -925,93 +1007,111 @@
                 <?php endif; ?>
             </div>
         </div>
+<!-- Schedule Section -->
+<section class="schedule-section" id="scheduleSection">
+    <h2 class="section-title">Horarios Disponibles</h2>
 
-        <!-- Schedule Section -->
-        <section class="schedule-section" id="scheduleSection">
-            <h2 class="section-title">Horarios Disponibles</h2>
+    <?php
+        $ahora = \Carbon\Carbon::now();
+        $fechaHoy = $ahora->format('Y-m-d');
+        $horaActual = $ahora->format('H:i:s');
+        
+        // Filtrar solo funciones futuras
+        $funcionesFuturas = $funciones->filter(function($f) use ($ahora) {
+            return \Carbon\Carbon::parse($f->hora)->isAfter($ahora);
+        });
+        
+        // Obtener fechas con funciones futuras
+        $fechasCalendario = collect();
+        for ($i = 0; $i < 14; $i++) {
+            $fecha = \Carbon\Carbon::now()->addDays($i)->format('Y-m-d');
+            
+            // Verificar si hay funciones futuras en esta fecha
+            $tieneFuncionesFuturas = $funcionesFuturas->filter(function ($f) use ($fecha, $ahora) {
+                $fechaFuncion = \Carbon\Carbon::parse($f->hora);
+                return $fechaFuncion->format('Y-m-d') === $fecha && $fechaFuncion->isAfter($ahora);
+            })->isNotEmpty();
+            
+            if ($tieneFuncionesFuturas) {
+                $fechasCalendario->push($fecha);
+            }
+        }
+        
+        // Obtener la primera fecha disponible con funciones futuras
+        $diaActivo = $fechasCalendario->first() ?? $fechaHoy;
+    ?>
 
+    <?php if($fechasCalendario->isEmpty()): ?>
+        <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <h3>No hay funciones disponibles</h3>
+            <p>No hay funciones programadas en los próximos 14 días</p>
+        </div>
+    <?php else: ?>
+        <!-- Date Selector -->
+        <div class="date-selector">
+            <div class="date-carousel">
+                <button class="carousel-btn" id="prevBtn" onclick="moveCarousel(-1)">◄</button>
+                
+                <div class="dates-container">
+                    <div class="dates-track" id="datesTrack">
+                        <?php $__currentLoopData = $fechasCalendario; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $fecha): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $carbon = \Carbon\Carbon::parse($fecha);
+                                $esActivo = $fecha === $diaActivo;
+                            ?>
+                            <div class="date-card <?php echo e($esActivo ? 'active' : ''); ?>" 
+                                 data-fecha="<?php echo e($fecha); ?>"
+                                 onclick="selectDay(this)">
+                                <div class="date-day"><?php echo e($carbon->locale('es')->isoFormat('ddd')); ?></div>
+                                <div class="date-number"><?php echo e($carbon->format('d')); ?></div>
+                                <div class="date-month"><?php echo e($carbon->locale('es')->isoFormat('MMM')); ?></div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                </div>
+
+                <button class="carousel-btn" id="nextBtn" onclick="moveCarousel(1)">►</button>
+            </div>
+        </div>
+
+        <!-- Cinema List -->
+        <div id="cinemaList">
             <?php
-                $fechaHoy = \Carbon\Carbon::now()->format('Y-m-d');
-                $fechasCalendario = collect();
-                for ($i = 0; $i < 14; $i++) {
-                    $fecha = \Carbon\Carbon::now()->addDays($i)->format('Y-m-d');
-                    $tieneFunciones = $funciones->contains(function ($f) use ($fecha) {
-                        return \Carbon\Carbon::parse($f->hora)->format('Y-m-d') === $fecha;
-                    });
-                    if ($tieneFunciones) {
-                        $fechasCalendario->push($fecha);
-                    }
-                }
-                $fechasConFunciones = $funciones->pluck('hora')
-                    ->filter(fn($h) => \Carbon\Carbon::parse($h)->format('Y-m-d') >= $fechaHoy)
-                    ->map(fn($h) => \Carbon\Carbon::parse($h)->format('Y-m-d'))
-                    ->unique()
-                    ->values();
-                $diaActivo = $fechasConFunciones->contains($fechaHoy)
-                    ? $fechaHoy
-                    : $fechasConFunciones->first();
+                // Filtrar funciones del día activo que sean futuras
+                $funcionesDelDia = $funcionesFuturas->filter(function($f) use ($diaActivo, $ahora) {
+                    $fechaFuncion = \Carbon\Carbon::parse($f->hora);
+                    return $fechaFuncion->format('Y-m-d') === $diaActivo && $fechaFuncion->isAfter($ahora);
+                })->groupBy('sala.nombre_sala');
             ?>
 
-            <!-- Date Selector -->
-            <div class="date-selector">
-                <div class="date-carousel">
-                    <button class="carousel-btn" id="prevBtn" onclick="moveCarousel(-1)">◄</button>
-                    
-                    <div class="dates-container">
-                        <div class="dates-track" id="datesTrack">
-                            <?php $__currentLoopData = $fechasCalendario; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $fecha): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php if($funcionesDelDia->count() > 0): ?>
+                <?php $__currentLoopData = $funcionesDelDia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $salaNombre => $funcionesSala): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="cinema-group">
+                        <div class="cinema-name">🎭 <?php echo e(htmlspecialchars($salaNombre)); ?></div>
+                        <div class="showtimes-grid">
+                            <?php $__currentLoopData = $funcionesSala->sortBy(fn($f) => \Carbon\Carbon::parse($f->hora)); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $funcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <?php
-                                    $carbon = \Carbon\Carbon::parse($fecha);
-                                    $esActivo = $fecha === $diaActivo;
+                                    $hora = \Carbon\Carbon::parse($funcion->hora)->format('H:i');
                                 ?>
-                                <div class="date-card <?php echo e($esActivo ? 'active' : ''); ?>" 
-                                     data-fecha="<?php echo e($fecha); ?>"
-                                     onclick="selectDay(this)">
-                                    <div class="date-day"><?php echo e($carbon->locale('es')->isoFormat('ddd')); ?></div>
-                                    <div class="date-number"><?php echo e($carbon->format('d')); ?></div>
-                                    <div class="date-month"><?php echo e($carbon->locale('es')->isoFormat('MMM')); ?></div>
-                                </div>
+                                <button class="showtime-card" onclick="reservarFuncion(<?php echo e($funcion->id); ?>)">
+                                    <div class="showtime-time"><?php echo e($hora); ?></div>
+                                    <div class="showtime-room">Sala <?php echo e($funcion->sala_id); ?></div>
+                                </button>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-
-                    <button class="carousel-btn" id="nextBtn" onclick="moveCarousel(1)">►</button>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php else: ?>
+                <div class="empty-state">
+                    <div class="empty-icon">🎬</div>
+                    <h3>No hay funciones disponibles</h3>
+                    <p>Selecciona otro día para ver las funciones disponibles</p>
                 </div>
-            </div>
-
-            <!-- Cinema List -->
-            <div id="cinemaList">
-                <?php
-                    $funcionesDelDia = $funciones->filter(fn($f) => \Carbon\Carbon::parse($f->hora)->format('Y-m-d') === $diaActivo)
-                        ->groupBy('sala.nombre_sala');
-                ?>
-
-                <?php if($funcionesDelDia->count() > 0): ?>
-                    <?php $__currentLoopData = $funcionesDelDia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $salaNombre => $funcionesSala): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="cinema-group">
-                            <div class="cinema-name">🎭 <?php echo e(htmlspecialchars($salaNombre)); ?></div>
-                            <div class="showtimes-grid">
-                                <?php $__currentLoopData = $funcionesSala; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $funcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php
-                                        $hora = \Carbon\Carbon::parse($funcion->hora)->format('H:i');
-                                    ?>
-                                    <button class="showtime-card" onclick="reservarFuncion(<?php echo e($funcion->id); ?>)">
-                                        <div class="showtime-time"><?php echo e($hora); ?></div>
-                                        <div class="showtime-room">Sala <?php echo e($funcion->sala_id); ?></div>
-                                    </button>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </div>
-                        </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <div class="empty-icon">🎬</div>
-                        <h3>No hay funciones disponibles</h3>
-                        <p>Selecciona otro día para ver las funciones disponibles</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </section>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</section>
     </div>
 
     <!-- Trailer Modal -->

@@ -6,6 +6,8 @@ use App\Models\Confiteria;
 use App\Models\Carrito;
 use App\Models\PedidoConfiteria;
 use App\Models\PedidoProducto;
+use App\Models\Reserva;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -246,77 +248,6 @@ class ConfiteriaController extends Controller
     }
 
     /**
-     * Crear pedido desde carrito
-     */
-    public function crearPedido(Request $request)
-    {
-        $carrito = Carrito::with('producto')
-            ->where('usuario_id', auth()->id())
-            ->get();
-
-        if ($carrito->isEmpty()) {
-            return back()->with('error', 'El carrito está vacío');
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // Verificar stock
-            foreach ($carrito as $item) {
-                if ($item->producto->stock < $item->cantidad) {
-                    DB::rollBack();
-                    return back()->with('error', "Stock insuficiente para {$item->producto->nombre}");
-                }
-            }
-
-            // Calcular totales
-            $subtotal = $carrito->sum(function ($item) {
-                return $item->cantidad * $item->producto->precio;
-            });
-            $cargoServicio = $subtotal * 0.05;
-            $total = $subtotal + $cargoServicio;
-
-            // Crear pedido
-            $pedido = PedidoConfiteria::create([
-                'usuario_id' => auth()->id(),
-                'reserva_id' => $request->reserva_id ?? null,
-                'subtotal' => $subtotal,
-                'cargo_servicio' => $cargoServicio,
-                'total' => $total,
-                'estado' => 'pendiente',
-                'expires_at' => now()->addMinutes(15)
-            ]);
-
-            // Crear detalle y reducir stock
-            foreach ($carrito as $item) {
-                PedidoProducto::create([
-                    'pedido_id' => $pedido->id,
-                    'producto_id' => $item->producto_id,
-                    'cantidad' => $item->cantidad,
-                    'precio_unitario' => $item->producto->precio,
-                    'subtotal' => $item->cantidad * $item->producto->precio
-                ]);
-
-                $item->producto->decrement('stock', $item->cantidad);
-            }
-
-            // Limpiar carrito
-            Carrito::where('usuario_id', auth()->id())->delete();
-
-            DB::commit();
-
-            return redirect()->route('pagos.checkout.confiteria', $pedido->id)
-                ->with('success', 'Pedido creado exitosamente');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Error al crear pedido:', ['error' => $e->getMessage()]);
-            
-            return back()->with('error', 'Error al crear el pedido');
-        }
-    }
-
-    /**
      * Ver mis pedidos
      */
     public function misPedidos()
@@ -339,5 +270,152 @@ class ConfiteriaController extends Controller
             ->findOrFail($id);
 
         return view('confiteria.detalle-pedido', compact('pedido'));
+    }
+
+
+    public function mostrarConfiteriaConReserva($reserva_id)
+    {
+        // Obtener la reserva con sus relaciones
+        $reserva = Reserva::with([
+            'funcion.movies',
+            'funcion.Sala',
+            'usuario',
+            'sillas.silla'
+        ])->findOrFail($reserva_id);
+        
+        // Verificar que el usuario sea el dueño de la reserva
+        if ($reserva->usuario_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para ver esta reserva');
+        }
+
+        // Verificar que la reserva no haya expirado
+        if ($reserva->hasExpired()) {
+            return redirect()->route('user.index')
+                ->with('error', 'Tu reserva ha expirado. Por favor, vuelve a seleccionar tus asientos.');
+        }
+
+        // Verificar que la reserva esté pendiente
+        if ($reserva->estado !== 'pendiente') {
+            return redirect()->route('reservas.show', $reserva->id)
+                ->with('error', 'Esta reserva ya fue procesada.');
+        }
+
+        // Obtener productos disponibles
+        $productos = Confiteria::where('stock', '>', 0)
+            ->orderBy('nombre')
+            ->get();
+
+        // Obtener carrito del usuario (por si tiene productos previos)
+        $carrito = Carrito::with('producto')
+            ->where('usuario_id', auth()->id())
+            ->get();
+
+        // Calcular totales del carrito
+        $subtotal = $carrito->sum(function ($item) {
+            return $item->cantidad * $item->producto->precio;
+        });
+        $cargoServicio = $subtotal * 0.05;
+        $totalConfiteria = $subtotal + $cargoServicio;
+
+        return view('user.reservaComfi', compact(
+            'reserva',
+            'productos',
+            'carrito',
+            'subtotal',
+            'cargoServicio',
+            'totalConfiteria'
+        ));
+    }
+
+    /**
+     * 🎯 MODIFICADO: Crear pedido vinculado a una reserva
+     */
+    public function crearPedido(Request $request)
+    {
+        $carrito = Carrito::with('producto')
+            ->where('usuario_id', auth()->id())
+            ->get();
+
+        if ($carrito->isEmpty()) {
+            return back()->with('error', 'El carrito está vacío');
+        }
+
+        // 🔍 Validar que la reserva exista y pertenezca al usuario
+        $reservaId = $request->reserva_id;
+        if ($reservaId) {
+            $reserva = Reserva::where('id', $reservaId)
+                ->where('usuario_id', auth()->id())
+                ->where('estado', 'pendiente')
+                ->first();
+
+            if (!$reserva) {
+                return back()->with('error', 'Reserva no válida o ya procesada');
+            }
+
+            if ($reserva->hasExpired()) {
+                return back()->with('error', 'Tu reserva ha expirado');
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Verificar stock
+            foreach ($carrito as $item) {
+                if ($item->producto->stock < $item->cantidad) {
+                    DB::rollBack();
+                    return back()->with('error', "Stock insuficiente para {$item->producto->nombre}");
+                }
+            }
+
+            // Calcular totales
+            $subtotal = $carrito->sum(function ($item) {
+                return $item->cantidad * $item->producto->precio;
+            });
+            $cargoServicio = $subtotal * 0.05;
+            $total = $subtotal + $cargoServicio;
+
+            // Crear pedido vinculado a la reserva
+            $pedido = PedidoConfiteria::create([
+                'usuario_id' => auth()->id(),
+                'reserva_id' => $reservaId ?? null, // 🔗 Vinculación con reserva
+                'subtotal' => $subtotal,
+                'cargo_servicio' => $cargoServicio,
+                'total' => $total,
+                'estado' => 'pendiente',
+                'expires_at' => now()->addMinutes(15)
+            ]);
+
+            // Crear detalle de productos
+            foreach ($carrito as $item) {
+                PedidoProducto::create([
+                    'pedido_id' => $pedido->id,
+                    'producto_id' => $item->producto_id,
+                    'cantidad' => $item->cantidad,
+                    'precio_unitario' => $item->producto->precio,
+                    'subtotal' => $item->cantidad * $item->producto->precio
+                ]);
+
+                // Reducir stock
+                $item->producto->decrement('stock', $item->cantidad);
+            }
+
+            // Limpiar carrito
+            Carrito::where('usuario_id', auth()->id())->delete();
+
+            DB::commit();
+
+            // 🎯 Redirigir al pago unificado (reserva + confitería)
+            return redirect()->route('pagos.checkout.unificado', [
+                'reserva_id' => $reservaId,
+                'pedido_id' => $pedido->id
+            ])->with('success', 'Pedido creado exitosamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al crear pedido:', ['error' => $e->getMessage()]);
+            
+            return back()->with('error', 'Error al crear el pedido');
+        }
     }
 }

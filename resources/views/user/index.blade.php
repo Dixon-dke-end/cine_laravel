@@ -29,12 +29,14 @@
                             Admin
                         </a>
                     @endif
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    <a href="{{ route('user.perfil') }}" style="text-decoration: none;">
+                        <div class="user-info" style="cursor: pointer;">
+                            <div class="user-avatar">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
+                            <span class="user-name">{{ Auth::user()->name }}</span>
                         </div>
-                        <span class="user-name">{{ Auth::user()->name }}</span>
-                    </div>
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
                         <button type="submit" class="btn-auth btn-logout">

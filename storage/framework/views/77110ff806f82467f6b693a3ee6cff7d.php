@@ -6,28 +6,119 @@
     <title>Funciones</title>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/admin_index.css', 'resources/js/app.js']); ?>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2942 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(22, 33, 62, 0.98);
+            border-bottom: 2px solid #00d4ff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .btn-add-navbar {
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-add-navbar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* MAIN CONTAINER */
         .main-container {
             display: flex;
             margin-top: 70px;
             min-height: calc(100vh - 70px);
         }
 
+        /* SIDEBAR */
         .sidebar {
-            width: 280px;
-            background: rgba(22, 33, 62, 0.95);
-            padding: 2rem 0;
-            border-right: 2px solid #00d4ff;
-            overflow-y: auto;
-            max-height: calc(100vh - 70px);
             position: fixed;
             left: 0;
             top: 70px;
+            width: 280px;
             height: calc(100vh - 70px);
+            background: rgba(22, 33, 62, 0.95);
+            border-right: 2px solid #00d4ff;
+            padding: 2rem 0;
+            overflow-y: auto;
             z-index: 900;
         }
 
@@ -112,17 +203,321 @@
             padding-left: 2.3rem;
         }
 
+        /* CONTENT WRAPPER */
         .content-wrapper {
             margin-left: 280px;
             flex: 1;
             width: calc(100% - 280px);
+            padding: 2rem;
+            overflow-y: auto;
         }
 
-        .navbar {
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .content h1 {
+            margin-bottom: 2rem;
+            color: #00d4ff;
+            font-size: 2.2rem;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.15);
+            border-left-color: #4CAF50;
+            color: #fff;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.15);
+            border-left-color: #f44336;
+            color: #fff;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            border: 2px dashed #00d4ff;
+            margin-top: 2rem;
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .btn-add {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* SPECIFIC STYLES FOR FUNCIONES */
+        .peliculas-funciones-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            padding: 20px 0;
+        }
+
+        .pelicula-section {
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .pelicula-section:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .pelicula-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .pelicula-info-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pelicula-thumbnail {
+            width: 100px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .pelicula-title-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pelicula-title {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #00d4ff;
+        }
+
+        .pelicula-year,
+        .pelicula-duration {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-right: 15px;
+        }
+
+        .funciones-count {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .funciones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .funcion-card {
+            background: rgba(22, 33, 62, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .funcion-card:hover {
+            background: rgba(22, 33, 62, 0.9);
+            border-color: #00d4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .funcion-time {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .funcion-sala {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .funcion-capacidad {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .funcion-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-funcion {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-edit-funcion {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: #fff;
+        }
+
+        .btn-edit-funcion:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-delete-funcion {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: #fff;
+        }
+
+        .btn-delete-funcion:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+
+            .content-wrapper {
+                margin-left: 250px;
+                width: calc(100% - 250px);
+                padding: 1rem;
+            }
+
+            .navbar {
+                padding: 1rem;
+                height: 70px;
+            }
+
+            .navbar-container {
+                gap: 1rem;
+            }
+
+            .btn-add-navbar {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .pelicula-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .funciones-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pelicula-info-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .funcion-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-container {
+                margin-top: 70px;
+            }
+
+            .content-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .navbar {
+                padding: 0.8rem;
+                height: auto;
+                flex-wrap: wrap;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-user {
+                gap: 0.5rem;
+            }
+
+            .btn-add-navbar {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .content h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -144,34 +539,19 @@
                             I
                         <?php endif; ?>
                     </div>
-                    <span class="user-name">
-                        <?php if(auth()->guard()->check()): ?>
-                            <?php echo e(Auth::user()->name); ?>
-
-                        <?php else: ?>
-                            Invitado
-                        <?php endif; ?>
-                    </span>
+                    <span><?php echo e(Auth::user()->name ?? 'Invitado'); ?></span>
                 </div>
                 
                 <?php if(auth()->guard()->guest()): ?>
-                    <a href="<?php echo e(route('login')); ?>" class="btn-dashboard">
+                    <a href="<?php echo e(route('login')); ?>" class="btn-add-navbar">
                         🔐 Iniciar Sesión
                     </a>
                 <?php endif; ?>
                 
                 <?php if(auth()->guard()->check()): ?>
-                    
-                    <a href="<?php echo e(route('dashboard')); ?>" class="btn-dashboard">
-                        📊 Dashboard
+                    <a href="<?php echo e(route('funciones.create')); ?>" class="btn-add-navbar">
+                        ➕ Agregar Función
                     </a>
-                    
-                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
-                        <?php echo csrf_field(); ?>
-                        <button type="submit" class="btn-logout">
-                            🚪 Cerrar Sesión
-                        </button>
-                    </form>
                 <?php endif; ?>
             </div>
         </div>
@@ -228,6 +608,20 @@
                     </div>
                 </div>
 
+                <!-- Sección Promociones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🏷️ Promociones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('promociones.index')); ?>" class="accordion-link">📋 Ver Promociones</a>
+                            <a href="<?php echo e(route('promociones.create')); ?>" class="accordion-link">➕ Agregar Promoción</a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sección Próximamente -->
                 <div class="accordion-item">
                     <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -236,7 +630,7 @@
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-links">
-                            <a href="<?php echo e(route('proximamente.index')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="<?php echo e(route('proximamente.admin')); ?>" class="accordion-link">📋 Próximos Estrenos</a>
                             <a href="<?php echo e(route('proximamente.create')); ?>" class="accordion-link">➕ Agregar Película</a>
                         </div>
                     </div>
@@ -252,6 +646,7 @@
                     <div class="accordion-content">
                         <div class="accordion-links">
                             <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👤 Vista Usuario</a>
+                            <a href="<?php echo e(route('user.index')); ?>" class="accordion-link">👨‍💼 Gestionar</a>
                         </div>
                     </div>
                 </div>
@@ -260,23 +655,13 @@
         </aside>
 
         <div class="content-wrapper">
-            <div class="container">
-                <div class="header">
-                    <h1>📅 Funciones de Cine</h1>
-                    <div style="display: flex; gap: 10px;">
-                        <a href="<?php echo e(route('funciones.create')); ?>" class="btn-add">
-                            <span>➕ Agregar Función</span>
-                        </a>
-                        <a href="<?php echo e(route('movies.index')); ?>" class="btn-add">
-                            <span>🔙 Volver a Películas</span>
-                        </a>
-                    </div>
-                </div>
+            <div class="content">
+                <h1>📅 Funciones de Cine</h1>
 
                 <?php if(session('success')): ?>
-                    <div class="alert alert-success" style="background: rgba(152, 251, 152, 0.2); border: 2px solid #98fb98; color: #98fb98; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
-                        <?php echo e(session('success')); ?>
-
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <span><?php echo e(session('success')); ?></span>
                     </div>
                 <?php endif; ?>
                 
@@ -342,7 +727,7 @@
                                                 </a>
                                                 <form action="<?php echo e(route('funciones.destroy', $funcion->id)); ?>" 
                                                       method="POST" 
-                                                      style="display: inline;"
+                                                      style="display: inline; flex: 1; display: flex;"
                                                       onsubmit="return confirmDelete(event, 'Función del <?php echo e(\Carbon\Carbon::parse($funcion->hora)->format('d/m/Y H:i')); ?>')">
                                                     <?php echo csrf_field(); ?>
                                                     <?php echo method_field('DELETE'); ?>
@@ -362,183 +747,23 @@
         </div>
     </div>
 
-    <style>
-        .peliculas-funciones-container {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            padding: 20px 0;
-        }
-
-        .pelicula-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .pelicula-section:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .pelicula-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .pelicula-info-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .pelicula-thumbnail {
-            width: 100px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .pelicula-title-info {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .pelicula-title {
-            font-size: 1.8rem;
-            margin: 0;
-            color: #fff;
-        }
-
-        .pelicula-year,
-        .pelicula-duration {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-right: 15px;
-        }
-
-        .funciones-count {
-            background: rgba(135, 206, 235, 0.2);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            color: #87ceeb;
-        }
-
-        .funciones-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .funcion-card {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .funcion-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(135, 206, 235, 0.5);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .funcion-time {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #87ceeb;
-            margin-bottom: 10px;
-        }
-
-        .funcion-sala {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 15px;
-        }
-
-        .funcion-capacidad {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .funcion-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-funcion {
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-
-        .btn-edit-funcion {
-            background: rgba(152, 251, 152, 0.2);
-            color: #98fb98;
-            border: 2px solid rgba(152, 251, 152, 0.3);
-        }
-
-        .btn-edit-funcion:hover {
-            background: rgba(152, 251, 152, 0.3);
-            border-color: #98fb98;
-            transform: scale(1.05);
-        }
-
-        .btn-delete-funcion {
-            background: rgba(255, 107, 107, 0.2);
-            color: #ff6b6b;
-            border: 2px solid rgba(255, 107, 107, 0.3);
-        }
-
-        .btn-delete-funcion:hover {
-            background: rgba(255, 107, 107, 0.3);
-            border-color: #ff6b6b;
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            .pelicula-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .funciones-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .pelicula-info-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .funcion-actions {
-                flex-direction: column;
-            }
-        }
-    </style>
-
     <script>
+        // Toggle Acordeón
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                if (h !== header) {
+                    h.classList.remove('active');
+                    h.nextElementSibling.classList.remove('active');
+                }
+            });
+
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
         // Crear partículas de fondo
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
@@ -577,10 +802,10 @@
                     card.style.opacity = '0';
                     
                     setTimeout(() => {
-                        event.target.closest('form').submit();
+                        event.target.submit();
                     }, 500);
                 } else {
-                    event.target.closest('form').submit();
+                    event.target.submit();
                 }
             } else {
                 if (card) {
@@ -622,5 +847,4 @@
     </script>
 </body>
 </html>
-
 <?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/movies/funciones.blade.php ENDPATH**/ ?>

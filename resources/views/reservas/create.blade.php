@@ -974,6 +974,7 @@ body {
             }, 1000);
         }
 // REEMPLAZA tu función confirmarReserva con esta:
+// 🎯 REEMPLAZA SOLO LA FUNCIÓN confirmarReserva() en tu vista de asientos
 
 async function confirmarReserva() {
     if (selectedSeats.size === 0) return;
@@ -997,36 +998,21 @@ async function confirmarReserva() {
             })
         });
 
-        const responseText = await response.text();
-        
-        // 🔍 MOSTRAR RESPUESTA COMPLETA
-        console.log('═══════════════════════════════════════');
-        console.log('📊 STATUS CODE:', response.status);
-        console.log('📄 RESPUESTA COMPLETA:');
-        console.log(responseText.substring(0, 1000)); // Primeros 1000 caracteres
-        console.log('═══════════════════════════════════════');
+        const data = await response.json();
 
-        // Si empieza con <!DOCTYPE o <html, es un error HTML
-        if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
-            alert('❌ ERROR: El servidor está devolviendo HTML en lugar de JSON\n\n' +
-                  'Status: ' + response.status + '\n' +
-                  'Revisa la consola para ver el error completo');
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'CONTINUAR →';
-            return;
+        // 🔍 Validar respuesta
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al crear la reserva');
         }
 
-        const data = JSON.parse(responseText);
-
-        if (data.success) {
-
-            window.location.href = `/pagos/checkout/${data.reserva.id}`;
-            alert('✅ ¡Reserva creada exitosamente!\n\nTe redirigiremos al detalle de tu reserva.');
+        if (data.success && data.reserva && data.reserva.id) {
+            // ✅ Redirigir a confitería con la reserva
+            console.log('✅ Reserva creada:', data.reserva.id);
+            window.location.href = `/user/confiteria/reserva/${data.reserva.id}`;
         } else {
-            alert(data.message || 'Error al crear la reserva');
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'CONTINUAR →';
+            throw new Error('Respuesta inválida del servidor');
         }
+
     } catch (error) {
         console.error('💥 ERROR:', error);
         alert('Error: ' + error.message);

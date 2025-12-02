@@ -32,7 +32,8 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg-body);
+            background-image: url(/storage/movies/portada.jpg);
+
             color: var(--text-main);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -505,7 +506,7 @@
                         <?php endif; ?>
                         
                         <div class="promo-actions">
-                            <button class="btn-promo btn-primary">Ver Detalles</button>
+                            <a href="<?php echo e(route('promociones.detalles', $promocion->id)); ?>" class="btn-promo btn-primary" style="text-decoration: none;">Ver Detalles</a>
                         </div>
                     </div>
                 </div>

@@ -34,4 +34,12 @@ class PedidoProducto extends Model
     {
         return $this->belongsTo(Confiteria::class, 'producto_id');
     }
+
+    /**
+     * Alias para la relación producto (para usar en eager loading)
+     */
+    public function confiteria()
+    {
+        return $this->belongsTo(Confiteria::class, 'producto_id');
+    }
 }
