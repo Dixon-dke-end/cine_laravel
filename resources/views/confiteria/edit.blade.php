@@ -5,6 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Producto Confitería</title>
     @vite(['resources/css/admin_edit.css', 'resources/js/app.js'])
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <!-- Logo a la izquierda -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="{{ route('user.index') }}" style="text-decoration: none; color: #fff; font-weight: bold; font-size: 1.2rem;">
+                    🎬 CineVel
+                </a>
+            </div>
+            
+            <!-- Centro -->
+            <div style="flex: 1; text-align: center;">
+                <span style="color: #87CEEB; font-size: 1rem;">Bienvenido, {{ Auth::user()->name ?? 'Usuario' }}</span>
+            </div>
+            
+            <!-- Botón a la derecha -->
+            <div>
+                @auth
+                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit" style="padding: 8px 20px; border-radius: 20px; background: rgba(255, 107, 107, 0.3); color: #fff; border: none; cursor: pointer; transition: all 0.3s ease;">
+                        🚪 Cerrar Sesión
+                    </button>
+                </form>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    <!-- Partículas de fondo -->
+    <div class="particles" id="particles"></div>
+
+    <div class="main-container">
+        <!-- Sidebar Acordeón -->
+        <aside class="sidebar">
+            <div class="sidebar-title">Menú Confitería</div>
+
+            @auth
+                <!-- Sección Confitería -->
+                <div class="accordion-item">
+                    <button class="accordion-header active" onclick="toggleAccordion(this)">
+                        <span>🍿 Confitería</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content active">
+                        <div class="accordion-links">
+                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
+                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Películas -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🎬 Películas</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
+                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Funciones -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>📅 Funciones</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
+                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Próximamente -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🎥 Próximamente</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('proximamente.admin') }}" class="accordion-link">📋 Próximos Estrenos</a>
+                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Usuarios (Solo Admin) -->
+                @if(Auth::user()->role === 'admin')
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>👥 Usuarios</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            @endauth
+        </aside>
+
+        <!-- Contenido Principal -->
+        <div class="content-wrapper">
+            <div class="container">
+                <div class="form-card">
+                    <div class="header">
+                        <h1>✏️ Editar Producto de Confitería</h1>
+                        <p class="subtitle">Actualiza la información del producto</p>
+                    </div>
+
+                    <form action="{{ route('confiteria.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="form-group">
+                            <label for="nombre">📝 Nombre del Producto</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ $registro->nombre }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descripcion">📄 Descripción</label>
+                            <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="precio">💵 Precio</label>
+                            <input type="number" id="precio" name="precio" value="{{ $registro->precio }}" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stock">📦 Stock</label>
+                            <input type="number" id="stock" name="stock" value="{{ $registro->stock }}" min="0" required>
+                            <div class="helper-text">
+                                @if($registro->stock < 10)
+                                    <span style="color: #ff6b6b;">⚠️ Stock bajo</span>
+                                @else
+                                    <span style="color: #98fb98;">✅ Stock disponible</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($registro->imagen)
+                        <div class="form-group">
+                            <label>🖼️ Imagen actual</label>
+                            <div class="image-preview">
+                                <p>Vista previa de la imagen actual</p>
+                                <img src="{{ asset('storage/' . $registro->imagen) }}" 
+                                     alt="Imagen de {{ $registro->nombre }}">
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="form-group">
+                            <label for="imagen">📷 Cambiar imagen</label>
+                            <input type="file" name="imagen" id="imagen" accept="image/*">
+                        </div>
+
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾 Actualizar Producto</span>
+                            </button>
+                            <a href="{{ route('confiteria.index') }}" class="btn btn-secondary">
+                                <span>🔙 Volver al Catálogo</span>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         body {
             display: flex;
@@ -125,166 +308,6 @@
             z-index: 1000;
         }
     </style>
-</head>
-<body>
-                            🚪 Cerrar Sesión
-                        </button>
-                    </form>
-                @endauth
-            </div>
-        </div>
-    </nav>
-
-    <!-- Partículas de fondo -->
-    <div class="particles" id="particles"></div>
-
-    <div class="main-container">
-        <!-- Sidebar Acordeón -->
-        <aside class="sidebar">
-            <div class="sidebar-title">Menú Confitería</div>
-
-            @auth
-                <!-- Sección Confitería -->
-                <div class="accordion-item">
-                    <button class="accordion-header active" onclick="toggleAccordion(this)">
-                        <span>🍿 Confitería</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content active">
-                        <div class="accordion-links">
-                            <a href="{{ route('confiteria.index') }}" class="accordion-link">📋 Ver Catálogo</a>
-                            <a href="{{ route('confiteria.create') }}" class="accordion-link">➕ Agregar Producto</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Películas -->
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>🎬 Películas</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('movies.index') }}" class="accordion-link">📋 Ver Todas</a>
-                            <a href="{{ route('movies.create') }}" class="accordion-link">➕ Agregar Nueva</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Funciones -->
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>📅 Funciones</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('funciones.index') }}" class="accordion-link">📋 Ver Funciones</a>
-                            <a href="{{ route('funciones.create') }}" class="accordion-link">➕ Agregar Función</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Próximamente -->
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>🎥 Próximamente</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('proximamente.index') }}" class="accordion-link">📋 Próximos Estrenos</a>
-                            <a href="{{ route('proximamente.create') }}" class="accordion-link">➕ Agregar Película</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Usuarios -->
-                @if(Auth::user()->role === 'admin')
-                <div class="accordion-item">
-                    <button class="accordion-header" onclick="toggleAccordion(this)">
-                        <span>👥 Usuarios</span>
-                        <span class="accordion-icon">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="accordion-links">
-                            <a href="{{ route('user.index') }}" class="accordion-link">👤 Vista Usuario</a>
-                        </div>
-                    </div>
-                </div>
-                @endif
-            @endauth
-        </aside>
-
-    <div class="content-wrapper">
-    <div class="container">
-        <div class="form-card">
-            <div class="header">
-                <h1>✏️ Editar Producto de Confitería</h1>
-                <p class="subtitle">Actualiza la información del producto</p>
-            </div>
-
-            <form action="{{ route('confiteria.update', $registro->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <div class="form-group">
-                    <label for="nombre">📝 Nombre del Producto</label>
-                    <input type="text" id="nombre" name="nombre" value="{{ $registro->nombre }}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="descripcion">📄 Descripción</label>
-                    <textarea id="descripcion" name="descripcion">{{ $registro->descripcion }}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="precio">💵 Precio</label>
-                    <input type="number" id="precio" name="precio" value="{{ $registro->precio }}" step="0.01" min="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="stock">📦 Stock</label>
-                    <input type="number" id="stock" name="stock" value="{{ $registro->stock }}" min="0" required>
-                    <div class="helper-text">
-                        @if($registro->stock < 10)
-                            <span style="color: #ff6b6b;">⚠️ Stock bajo</span>
-                        @else
-                            <span style="color: #98fb98;">✅ Stock disponible</span>
-                        @endif
-                    </div>
-                </div>
-
-                @if($registro->imagen)
-                <div class="form-group">
-                    <label>🖼️ Imagen actual</label>
-                    <div class="image-preview">
-                        <p>Vista previa de la imagen actual</p>
-                        <img src="{{ asset('storage/' . $registro->imagen) }}" 
-                             alt="Imagen de {{ $registro->nombre }}">
-                    </div>
-                </div>
-                @endif
-
-                <div class="form-group">
-                    <label for="imagen">📷 Cambiar imagen</label>
-                    <input type="file" name="imagen" id="imagen" accept="image/*">
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">
-                        <span>💾 Actualizar Producto</span>
-                    </button>
-                    <a href="{{ route('confiteria.index') }}" class="btn btn-secondary">
-                        <span>🔙 Volver al Catálogo</span>
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-    </div>
-    </div>
 
     <script>
         // Toggle Acordeón

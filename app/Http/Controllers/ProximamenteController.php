@@ -58,7 +58,7 @@ class ProximamenteController extends Controller
         // Crear el registro
         Movie::create($validate);
 
-        return redirect()->route('proximamente.index')->with('success', 'Película agregada a Próximamente');
+        return redirect()->route('proximamente.admin')->with('success', 'Película agregada a Próximamente');
     }
 
     /**
