@@ -1,1 +1,0 @@
-<?php /**PATH C:\Users\Dixon\Desktop\cine_laravel\resources\views/user/proximamente.blade.php ENDPATH**/ ?>

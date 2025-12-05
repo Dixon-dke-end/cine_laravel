@@ -10,6 +10,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ProximamenteController;
 use App\Http\Controllers\ConfiteriaController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\ReportesController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -121,6 +122,13 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/pagos/pending/{reserva_id}', [PagoController::class, 'pagoExitoso'])
         ->name('pagos.pending');
+});
+
+// Rutas de reportes (solo para administradores)
+Route::middleware('auth')->group(function () {
+    Route::get('/reportes', [ReportesController::class, 'index'])->name('reportes.index');
+    Route::post('/reportes/generar', [ReportesController::class, 'generarReporte'])->name('reportes.generar');
+    Route::get('/reportes/exportar-pdf', [ReportesController::class, 'exportarPDF'])->name('reportes.exportarPDF');
 });
 
 Route::post('/webhooks/mercadopago', [PagoController::class, 'webhookMercadoPago'])

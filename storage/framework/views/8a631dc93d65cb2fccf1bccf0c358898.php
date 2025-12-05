@@ -688,6 +688,19 @@
                     </div>
                 </div>
 
+                <!-- Sección Reportes -->
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>📊 Reportes</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-links">
+                            <a href="<?php echo e(route('reportes.index')); ?>" class="accordion-link">📈 Reporte Mensual</a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sección Usuarios -->
                 <?php if(Auth::user()->role === 'admin'): ?>
                 <div class="accordion-item">
